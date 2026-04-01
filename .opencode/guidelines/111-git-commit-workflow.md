@@ -7,8 +7,6 @@
 - **NEVER discard uncommitted changes** — even if they appear to be formatting-only, unintended, or erroneous. Analysis commands are read-only.
 - **NEVER commit or merge without direct instruction.** Commits and merges may ONLY be initiated by the developer as a direct instruction to the AI agent. Autonomously committing or merging is FORBIDDEN.
 - **NEVER create a PR without direct instruction.** PRs require explicit developer request — the agent does NOT automatically create PRs after completing implementation. See `113-git-pr-workflow.md`.
-- Agent MUST NOT create commit messages or scripts proactively (without user request).
-- When asked to "prepare a commit" — see Section 2 for the mandatory script-based workflow.
 
 ### STOP ASKING FOR COMMITS AND PRS
 
@@ -53,22 +51,20 @@ git commit -m "message" \
     --trailer "Co-authored-by: <Human-Name> <human-email>"
 ```
 
----
+### When Commits Happen
 
-## 2. Preparing Commits (Script-Based Workflow)
+Commits occur during the PR creation workflow, not as a separate step:
 
-When asked to "prepare a commit" (or similar READ-ONLY phrase):
+1. **Implementation completes** → review-prep task pushes branch
+2. **Developer reviews** → Developer says "create a PR"
+3. **PR creation** → Squash commit is executed as part of PR creation
+4. **No intermediate scripts** → No `./tmp/commit.sh` or manual steps
 
-**Mandatory Steps:**
-1. Run read-only commands: `git status`, `git diff`, `git diff --cached`, `git log`
-2. Summarize the changes (grouped logically if multiple files)
-3. **Create a shell script in `./tmp/`** containing the `git add` and `git commit` commands
-4. **STOP** — do NOT run the script, do NOT run `git add` or `git commit`
-5. Report the script path and proposed commit message for the user to review and execute
+See `git-workflow` skill for the complete PR creation workflow.
 
 ---
 
-## 3. Reading Historical Content
+## 2. Reading Historical Content
 
 ### ✅ ALWAYS DO
 - To inspect a file at a historical commit, use `git show <ref>:<path> > ./tmp/historical_file.ext`.
@@ -79,7 +75,7 @@ When asked to "prepare a commit" (or similar READ-ONLY phrase):
 
 ---
 
-## 4. Lockfile Policy
+## 3. Lockfile Policy
 
 - This repository is an application/CI repo — commit `uv.lock`.
 

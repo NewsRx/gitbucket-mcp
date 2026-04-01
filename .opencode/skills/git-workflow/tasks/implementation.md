@@ -78,7 +78,7 @@ git commit -m "WIP: <descriptive message>"
 
 - Guidelines: `111-git-commit-workflow.md`
 - Related skills: `approval-gate` (authorization scope)
-- Related tasks: `commit-prep` (squash for PR), `pr-creation` (push and PR)
+- Related tasks: `pr-creation` (push and PR)
 
 ## When to Commit During Implementation
 
