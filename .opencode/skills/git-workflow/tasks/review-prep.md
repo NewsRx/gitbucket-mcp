@@ -52,6 +52,23 @@ Review-prep task:
 
 **The review prep workflow provides developer visibility - it must NEVER be skipped.**
 
+**⚠️ "No File Changes" Edge Case Clarification:**
+
+The "Already Implemented" edge case in SKILL.md applies ONLY when **ZERO files were modified**.
+
+| Scenario | Workflow |
+|----------|----------|
+| Zero files modified (all changes already present) | Skip PR workflow, close with verification |
+| ANY file modified (including docs/guidelines) | FULL PR workflow REQUIRED |
+| Guideline/documentation changes | FULL PR workflow REQUIRED |
+
+**Guideline and documentation changes are NOT exempt from PR workflow.**
+
+If ANY file was created, modified, or deleted (including `.md` files in `.opencode/`):
+1. **Follow full PR workflow** - commit → push → review-prep → PR creation → merge → cleanup
+2. **Do NOT skip review-prep** - developer visibility is mandatory
+3. **Do NOT close issues directly** - requires PR merge verification
+
 **"No File Changes" Edge Case:**
 When implementation determines "no file changes needed":
 1. **STILL push branch** - git will report "up-to-date", which is acceptable
