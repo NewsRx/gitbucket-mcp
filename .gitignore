@@ -53,3 +53,9 @@ tmp/
 # OS
 .DS_Store
 Thumbs.db
+
+# Workflow state (explicitly track)
+!workflow-state/
+
+# OpenAPI specs (explicitly track)
+!openapi-specs/
