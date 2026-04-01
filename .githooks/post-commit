@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""
+Post-commit hook: Warn if AI agent committed to main branch.
+
+This is a backup safety net if pre-commit hook is bypassed.
+
+Exit codes:
+  0: Always (this is a warning, not a block)
+"""
+
+import os
+import subprocess
+import sys
+
+
+PROTECTED_BRANCHES = ("main", "master")
+
+
+def get_current_branch() -> str:
+    """Get the current branch name."""
+    result = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.stdout.strip()
+
+
+def is_ai_agent() -> bool:
+    """Check if OpenCode AI agent is running."""
+    for key in os.environ:
+        if key.startswith("OPENCODE_"):
+            return True
+    return False
+
+
+def main() -> int:
+    """Warn if AI committed to main."""
+    branch = get_current_branch()
+
+    if branch in PROTECTED_BRANCHES and is_ai_agent():
+        print("\n" + "=" * 70, file=sys.stderr)
+        print("⚠️  WARNING: AI agent committed to 'main' branch", file=sys.stderr)
+        print("=" * 70, file=sys.stderr)
+        print("\nThis violates the feature-branch workflow.", file=sys.stderr)
+        print("AI agents must NEVER commit directly to main.\n", file=sys.stderr)
+        print("To undo this commit:", file=sys.stderr)
+        print("   git reset --soft HEAD~1", file=sys.stderr)
+        print("\nThen create a feature branch:", file=sys.stderr)
+        print("   git checkout -b feature/<description>", file=sys.stderr)
+        print("   git commit -m \"...\"\n", file=sys.stderr)
+        print("=" * 70 + "\n", file=sys.stderr)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
