@@ -9,8 +9,8 @@ uv run python ai_bin/session_init.py
 ```
 
 **Script outputs:**
-- `GIT_USER_NAME`: Human collaborator name (for commit trailers)
-- `GIT_USER_EMAIL`: Human collaborator email (for commit trailers)
+- `DEV_NAME`: Human collaborator name (for commit trailers)
+- `DEV_EMAIL`: Human collaborator email (for commit trailers)
 - `GIT_OWNER`: Repository owner (for API calls)
 - `GIT_REPO`: Repository name (for API calls)
 - `GIT_HOOKS_PATH`: Git hooks path (to verify hooks installed)

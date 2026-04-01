@@ -124,8 +124,8 @@ git checkout -b spec/<short-name>
 ### ✅ REQUIRED SEQUENCE
 1. Run session init: `uv run python ai_bin/session_init.py`
 2. Store ALL output values for session duration:
-   - `GIT_USER_NAME` (human name for commit trailers)
-   - `GIT_USER_EMAIL` (human email for commit trailers)
+   - `DEV_NAME` (human name for commit trailers)
+   - `DEV_EMAIL` (human email for commit trailers)
    - `GIT_OWNER` (repository owner for GitHub API calls)
    - `GIT_REPO` (repository name for GitHub API calls)
    - `GIT_HOOKS_PATH` (git hooks path)
@@ -577,6 +577,38 @@ PRs require the developer to say one of these EXACT phrases:
 
 **See `124-github-archive-workflow.md` for complete issue closure timing.**
 **See `git-workflow` skill → "Phase 4" section for post-merge workflow including issue closure.**
+
+---
+
+## Critical Violation: Skipping PR for Documentation/Guideline Changes
+
+**⚠️ Documentation and guideline changes are NOT exempt from the PR workflow.**
+
+**🚫 FORBIDDEN:**
+- Treating documentation changes as "minor" and closing issues directly
+- Skipping review-prep for `.md` file changes
+- Closing issues without PR when guidelines, docs, or configs were modified
+- Assuming "no code changes" allows skipping PR workflow
+
+**✅ REQUIRED:**
+- **ALL file modifications** (code, docs, guidelines, configs) require full PR workflow
+- Branch-first rule applies to ALL file types
+- review-prep is MANDATORY before any issue closure
+- PR merge verification is required before closing ANY issue
+
+**File Types That Require Full PR Workflow:**
+
+| File Type | PR Required? | Reason |
+|-----------|--------------|--------|
+| Code (`.py`, `.java`, etc.) | ✅ YES | Code changes |
+| Guidelines (`.opencode/`) | ✅ YES | Changes to rules |
+| Documentation (`docs/`, `*.md`) | ✅ YES | Changes to docs |
+| Config (`*.toml`, `*.yaml`) | ✅ YES | Config changes |
+| **NO files modified** | ❌ NO | Already implemented |
+
+**The only exception is when ZERO files were modified** — all proposed changes were already present in the codebase. In that case, close with a verification comment without PR workflow.
+
+**See `git-workflow` skill → "Edge Case: Already Implemented" for the complete workflow.**
 
 ---
 

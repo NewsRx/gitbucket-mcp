@@ -96,6 +96,7 @@ cleanup: Verify merge via GitHub API → Close issues
 | Skip HALT after push | Issues closed without PR |
 | Close issues without PR merge | Lost tracking, audit trail broken |
 | Skip GitHub API verification | Closing issues on unmerged PRs |
+| **Close issues directly for doc/guideline changes** | **CRITICAL - docs require full PR workflow** |
 
 ## Critical Rules
 
@@ -153,6 +154,16 @@ git push --force-with-lease origin <branch>
 
 **When spec investigation reveals all changes are already present:**
 
+**🚫 CRITICAL: This edge case applies ONLY when ZERO file modifications were made.**
+
+| Scenario | Workflow |
+|----------|----------|
+| Zero files modified (all changes already present) | Skip PR workflow, close with verification |
+| ANY file modified (including docs/guidelines) | FULL PR workflow REQUIRED |
+| Guideline/documentation changes | FULL PR workflow REQUIRED |
+
+**When ZERO files modified:**
+
 1. **Skip branch creation entirely:**
    - Do NOT create feature branch
    - Do NOT push anything
@@ -180,6 +191,12 @@ git push --force-with-lease origin <branch>
 4. **Report completion in chat and HALT:**
    - No further workflow steps needed
 
+**When ANY file modified (including guidelines/docs):**
+
+- MUST follow full PR workflow: commit → push → review-prep → PR creation → merge → cleanup
+- Guidelines and documentation are NOT exempt from PR workflow
+- Branch-first rule applies to ALL file types (code, docs, guidelines, configs)
+
 ## Task Dependencies
 
 ```
@@ -201,4 +218,4 @@ pre-work → implementation → review-prep → [commit-prep] → pr-creation �
 
 - Related skills: `approval-gate` (authorization), `pr-creation-workflow` (PR timing)
 - Related guidelines: `110-git-branch-first.md`, `111-git-commit-workflow.md`, `113-git-pr-workflow.md`, `114-git-branch-cleanup.md`, `124-github-archive-workflow.md`
-- Session init: `000-session-init.md` (for GIT_OWNER, GIT_REPO, GIT_USER_NAME, GIT_USER_EMAIL)
+- Session init: `000-session-init.md` (for GIT_OWNER, GIT_REPO, DEV_NAME, DEV_EMAIL)
