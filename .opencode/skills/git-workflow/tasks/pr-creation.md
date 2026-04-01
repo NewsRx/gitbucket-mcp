@@ -120,11 +120,20 @@ Fixes #<child2>
 
 ## Co-Author Trailers (MANDATORY)
 
-See `commit-prep` task for trailer format.
-
 Every squash commit MUST include:
 1. AI Author trailer
 2. Human Collaborator trailer
+
+**AI Trailer Format:**
+- Use dynamic model detection at runtime
+- Format: `Co-authored-by: <AI-Name> (<model-id>) <noreply@example.com>`
+- Example: `Co-authored-by: OpenCode (glm-5) <noreply@opencode.ai>`
+
+**Human Trailer:**
+- Use session values from `000-session-init.md`
+- `DEV_NAME`: Human's name
+- `DEV_EMAIL`: Human's email
+- Format: `Co-authored-by: <Human-Name> <human-email>`
 
 ## Sub-Issue Autoclose
 

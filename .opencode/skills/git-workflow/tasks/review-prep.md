@@ -211,7 +211,7 @@ Post to chat (same content):
 
 - Guidelines: `113-git-pr-workflow.md` (review phase)
 - Related skills: `pr-creation-workflow` (PR timing)
-- Related tasks: `commit-prep` (squash), `pr-creation` (PR)
+- Related tasks: `pr-creation` (PR)
 
 ## Why This Task Exists
 

@@ -129,7 +129,7 @@ https://github.com/<owner>/<repo>/compare/main...<branch-name>
 
 - Session values: GIT_OWNER, GIT_REPO, branch name
 - Guidelines: `113-git-pr-workflow.md` (review phase)
-- Related tasks: `commit-prep` (squash), `pr-creation` (PR)
+- Related tasks: `pr-creation` (PR)
 
 ## Why This Task Is Critical
 
