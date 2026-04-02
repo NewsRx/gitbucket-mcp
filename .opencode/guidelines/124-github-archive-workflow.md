@@ -495,4 +495,50 @@ Before closing any issue (SPEC or Task), the AI agent MUST provide a final summa
 
 ---
 
+## ⚠️ ENFORCED: Final HALT After Issue Closure
+
+**After closing issues and posting final summary, the agent MUST HALT.**
+
+### What HALT Means After Cleanup
+
+| Action | Status |
+|--------|--------|
+| Close issues | ✅ Done |
+| Delete branches | ✅ Done |
+| Post final summary | ✅ Done |
+| Ask "What's next?" | 🚫 NEVER |
+| Prompt for next task | 🚫 NEVER |
+| Suggest new work | 🚫 NEVER |
+
+### Correct Final Output
+
+```
+**Summary:**
+
+<What was implemented - 1-2 sentences describing the impact and stakeholder value>
+
+**Outcome:** <What changed for stakeholders>
+
+**PR:** https://github.com/<owner>/<repo>/pull/<number>
+
+**Issues Closed:** #<parent>, #<child1>, #<child2>, ...
+
+All tasks complete from this specification.
+
+[END - no further action]
+```
+
+### 🚫 CRITICAL VIOLATIONS After Cleanup
+
+| Violation | Example |
+|-----------|---------|
+| Continue without new instruction | "Ready for next task?" |
+| Suggest next work | "Should I start on #75?" |
+| Prompt for anything | "What would you like me to do?" |
+| Not posting final summary | Missing executive summary |
+
+**The cleanup task is the END of the PR workflow. HALT means STOP.**
+
+---
+
 *Source: `020-github-workflow.md` and `040-plan-delivery.md` (restructured)*

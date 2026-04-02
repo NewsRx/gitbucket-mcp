@@ -25,6 +25,28 @@ Delete merged branches after PR merge, clean stale references, and verify reposi
 
 ## Procedure
 
+### Step 0: Final Executive Summary Template (CRITICAL)
+
+**The `cleanup` task is THE END of the PR workflow. It MUST produce a final executive summary and then HALT.**
+
+**Executive Summary Template:**
+
+```
+**Summary:**
+
+<What was implemented - 1-2 sentences describing the impact and stakeholder value>
+
+**Outcome:** <What changed for stakeholders>
+
+**PR:** https://github.com/<owner>/<repo>/pull/<number>
+
+**Issues Closed:** #<parent>, #<child1>, #<child2>, ...
+
+All tasks complete from this specification.
+```
+
+**⚠️ CRITICAL: This summary is MANDATORY - it provides closure for the entire workflow.**
+
 ### Step 1: Verify PR Merge (CRITICAL - NO EXCEPTIONS)
 
 **🚫 CRITICAL VIOLATION: Closing issues without PR merge verification is a CRITICAL GUIDELINE VIOLATION.**
@@ -354,3 +376,53 @@ NO parent/child structure check
 - No merge verification
 - Potential reopen of closed issues if PR rejected
 - Lost audit trail
+
+## Final HALT (CRITICAL)
+
+**After closing issues and posting final summary, the agent MUST HALT.**
+
+**HALT = Stop all further action. No prompting, no questions, no next steps.**
+
+### What HALT Means After Cleanup
+
+| Action | Status |
+|--------|--------|
+| Close issues | ✅ Done |
+| Delete branches | ✅ Done |
+| Post final summary | ✅ Done |
+| Ask "What's next?" | 🚫 NEVER |
+| Prompt for next task | 🚫 NEVER |
+| Suggest new work | 🚫 NEVER |
+
+**The workflow is complete. The agent stops. The human decides what happens next.**
+
+### Correct Final Output
+
+```
+**Summary:**
+
+Created `github-issue-creation` skill with sub-task architecture enforcing spec-first workflow. The skill validates specs before creation, checks for conflicts, and invokes auditor skills before approval.
+
+**Outcome:**
+
+The skill integrates with existing skill ecosystem (approval-gate, github-comments, github-sub-issues). Direct `github_issue_write` calls are now flagged as critical violations. All sub-issues (#71-74) closed after PR #81 merged.
+
+**PR:** https://github.com/NewsRx/gitbucket-mcp/pull/81
+
+**Issues Closed:** #70, #71, #72, #73, #74
+
+All tasks complete from this specification.
+
+[END - no further action]
+```
+
+### 🚫 CRITICAL VIOLATIONS After Cleanup
+
+| Violation | Example |
+|-----------|---------|
+| Continue without new instruction | "Ready for next task?" |
+| Suggest next work | "Should I start on #75?" |
+| Prompt for anything | "What would you like me to do?" |
+| Not posting final summary | Missing executive summary |
+
+**The cleanup task is the END. HALT means STOP.**
