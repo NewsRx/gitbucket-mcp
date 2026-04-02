@@ -131,6 +131,74 @@ Before ANY branch deletion:
 
 **If ANY check fails → SKIP that branch with warning.**
 
+## Sub-Issue Closure Enforcement (CRITICAL)
+
+**⚠️ CRITICAL: Sub-issues are closed by the platform via "Fixes #N" annotations, NOT manually by the agent.**
+
+### 🚫 FORBIDDEN
+
+- **Closing sub-issues after implementation but BEFORE PR merge**
+- **Closing sub-issues when PR is created but not merged**
+- **Manually closing sub-issues that have "Fixes #N" in PR description**
+- **Closing sub-issues without verifying PR merge via GitHub API**
+
+### ✅ REQUIRED WORKFLOW
+
+**The platform (GitBucket/GitHub) closes issues automatically via "Fixes #N" annotations.**
+
+1. **Implement sub-issue** → Create PR with `Fixes #N` in description
+2. **PR created** → Report URL, HALT
+3. **Human merges PR** → Platform automatically closes sub-issue
+4. **User confirms "pr merged"** → Agent verifies merge via GitHub API
+5. **Agent verifies sub-issues are closed** → API check (`state: "closed"`)
+6. **If sub-issue still open (edge case)** → Agent closes it manually
+7. **All sub-issues closed?** → Close parent issue
+
+### Verification Sequence
+
+```python
+# Step 1: Verify PR merge via GitHub API
+pr = github_pull_request_read(method="get", owner=..., repo=..., pullNumber=...)
+if pr.get("merged_at") is None:
+    halt("PR not merged yet")
+
+# Step 2: Check all sub-issues are closed (platform should have done this)
+children = github_issue_read(method="get_sub_issues", issue_number=parent)
+open_children = [c for c in children if c["state"] == "open"]
+
+if open_children:
+    # Edge case: Platform failed to auto-close
+    for child in open_children:
+        github_issue_write(method="update", issue_number=child["number"], 
+                          state="closed", state_reason="completed")
+
+# Step 3: Close parent only after all children closed
+if not open_children:
+    github_issue_write(method="update", issue_number=parent,
+                       state="closed", state_reason="completed")
+```
+
+### "Fixes #N" Annotation (MANDATORY)
+
+**PR descriptions MUST include sub-issue numbers:**
+
+```markdown
+Fixes #86, #87, #88
+
+[PR body...]
+```
+
+This enables automatic closure by GitBucket/GitHub.
+
+### Edge Case Handling
+
+| Scenario | Action |
+|----------|--------|
+| Platform fails to auto-close sub-issue | Agent closes manually after PR merge verification |
+| PR closed without merge | Sub-issues remain open (correct behavior) |
+| Draft PR | Sub-issues remain open until PR is merged (correct behavior) |
+| Multiple sub-issues in one PR | Include all in "Fixes #N, #M, #P" annotation |
+
 ## Sub-Issue Double-Check (CRITICAL)
 
 After closing child issues addressed by PR, ALWAYS verify remaining sub-issues before closing parent.

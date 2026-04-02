@@ -144,6 +144,14 @@ autoclose_issues = [<parent>] + [sub["number"] for sub in sub_issues]
 
 No sub-issues needed. Include only parent issue.
 
+**⚠️ CRITICAL: Sub-issues are closed by the platform, NOT by the agent.**
+
+- The "Fixes #N" annotation in PR body triggers automatic closure
+- Agent does NOT manually close sub-issues after implementation
+- Agent does NOT close sub-issues after PR creation
+- Agent verifies closure AFTER PR merge via GitHub API
+- Only in edge case (platform fails) does agent manually close
+
 ### Step 4: Create PR via GitHub MCP
 
 ```python
