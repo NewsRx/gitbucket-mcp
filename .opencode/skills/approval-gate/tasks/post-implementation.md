@@ -25,7 +25,7 @@ The sequence is:
 
 - Feature branch pushed to remote
 - GitHub compare URL generated
-- Completion reported to issue and chat
+- Completion reported to issue (NO URL) and chat (with URL)
 - HALT for developer review
 
 ## Procedure
@@ -51,31 +51,17 @@ git status --porcelain
 
 **When implementation determined no changes were needed:**
 
-1. **Close issue directly:**
-   - Post verification comment explaining what was checked
-   - Use `github_issue_write(method="update", state="closed", state_reason="completed")`
+1. **Post completion comment to issue (NO URL):**
+   - Summarize what was completed
+   - No compare URL in GitHub issue
 
-2. **Comment format:**
-```markdown
-🤖 ✅ Completed by <AgentName> (<ModelID>)
+2. **Report compare URL in chat only:**
+   - URL goes in chat dialog only
+   - NEVER post URLs to GitHub issues
 
-**Summary:**
-
-Verified all proposed changes were already implemented. No modifications needed.
-
-**Verification Results:**
-
-- [List what was checked with file references and function names]
-- [Confirm each requirement from spec is present]
-
-**Outcome:** <What the verification confirmed>
-```
-
-3. **HALT after closing:**
-   - No branch push
-   - No compare URL
-   - No PR needed
-   - Report completion in chat
+3. **HALT after reporting:**
+   - No branch push (already pushed)
+   - No PR creation
 
 ---
 
@@ -97,7 +83,7 @@ https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
 
 ### Step 3: Report Completion
 
-Format for issue and chat:
+Format for issue (NO URL):
 
 ```markdown
 **Summary:**
@@ -106,12 +92,21 @@ Format for issue and chat:
 
 **Outcome:** <What changed for stakeholders>
 
-**Ready for Review:**
-
-https://github.com/<owner>/<repo>/compare/main...<branch-name>
+All tasks complete from this specification.
 
 ---
 🤖 ✅ Completed by <AgentName> (<ModelID>)
+```
+
+Post to chat (exec summary + URL):
+```
+**Summary:**
+
+<1-2 sentences describing the impact and stakeholder value.>
+
+**Outcome:** <What changed for stakeholders>
+
+Compare URL: https://github.com/<owner>/<repo>/compare/main...<branch-name>
 ```
 
 ### Step 4: HALT

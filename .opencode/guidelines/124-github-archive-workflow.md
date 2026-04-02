@@ -76,7 +76,7 @@ github_issue_write(method="update", issue_number=456, state="closed", state_reas
 - Report: "PR #123 is not yet merged. Please confirm merge before I close the issue."
 
 **Sequence:**
-1. Implement → Create PR → Report PR URL → HALT
+1. Implement → Create PR → Report URL in chat → HALT
 2. Human reviews and merges PR
 3. User confirms "pr merged"
 4. **Call GitHub API to verify PR state** ← MANDATORY STEP

@@ -39,7 +39,7 @@
 - **ALL PRs require human review before merge** — no exceptions, no self-merging.
 - **"go" does NOT authorize merging.** "go" means "proceed to the next task or phase" — NOT "merge the PR". If all tasks are complete, report summary and HALT.
 - The agent creates PRs, addresses feedback, and waits for human approval and merge.
-- After PR creation, the agent MUST report the PR URL and HALT.
+- After PR creation, the agent MUST report the URL in chat and HALT.
 - If PR is open and user says "go", the agent must clarify that merging requires explicit "merge" instruction.
 
 ---

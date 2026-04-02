@@ -100,7 +100,7 @@ When implementation determines "no file changes needed":
 
 ## Exit Criteria
 
-- Compare URL generated and posted
+- Compare URL generated and reported in CHAT ONLY
 - Developer can review changes via GitHub diff viewer
 
 ## Procedure
@@ -152,9 +152,9 @@ https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
 
 ### Step 2: Report Completion (BOTH Issue AND Chat)
 
-**⚠️ CRITICAL: Completion comment MUST be posted to BOTH the GitHub issue AND chat.**
+**⚠️ CRITICAL: URLs go in CHAT ONLY - NEVER to GitHub Issues.**
 
-Post to GitHub issue:
+Post completion comment to GitHub issue (NO URL):
 ```markdown
 **Summary:**
 
@@ -162,17 +162,28 @@ Post to GitHub issue:
 
 **Outcome:** <What changed for stakeholders>
 
-**Ready for Review:**
-
-https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
+All tasks complete from this specification.
 
 ---
 🤖 ✅ Completed by <AgentName> (<ModelID>)
 ```
 
-Post to chat (same content):
-- Same executive summary + compare URL
-- Ensures visibility in BOTH GitHub history AND current session
+Post to chat (exec summary + URL):
+```
+**Summary:**
+
+<1-2 sentences describing the impact and stakeholder value.>
+
+**Outcome:** <What changed for stakeholders>
+
+Compare URL: https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
+```
+
+**Why This Matters:**
+- Chat gets exec summary + URL (developer needs visibility)
+- Issues get exec summary only (NO URL - keeps history clean)
+- Developer can click URL from chat to review changes
+- BOTH locations have matching summaries for context
 
 ### Step 3: HALT (MANDATORY - NO EXCEPTIONS)
 
@@ -245,7 +256,9 @@ Verify branch is pushed
     ↓
 Generate compare URL
     ↓
-Post compare URL to issue + chat
+Report URL in CHAT ONLY (NEVER to GitHub Issues)
+    ↓
+Post completion comment to issue (NO URL)
     ↓
 HALT - Wait for "create a PR"
     ↓
@@ -268,14 +281,13 @@ Push branch to remote
     ↓
 Close issues IMMEDIATELY (SKIPPED HALT)
     ↓
-NO compare URL posted
+NO compare URL reported in chat
 NO PR created
 NO merge verification
-```
 
 **This incorrect workflow VIOLATES critical rules and causes:**
 - Issues closed without PR tracking
-- No developer visibility via compare URL
+- No developer visibility via compare URL in chat
 - No review before closure
 - Lost audit trail
 

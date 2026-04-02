@@ -92,7 +92,7 @@ instruction, HALTing after PR creation, and NEVER merging PRs.
 | Violation | Consequence |
 |-----------|-------------|
 | Multiple commits in PR | PR REJECTED — squash required |
-| Missing PR URL report | CRITICAL — communication failure |
+| Missing PR URL in chat | CRITICAL — communication failure |
 | Premature merge attempt | CRITICAL — HUMAN-ONLY operation |
 
 ### Violation Warning
@@ -146,7 +146,7 @@ If you accidentally create a PR with multiple commits:
    - Head: `<branch-name>`
    - Base: `main`
 
-5. **Report PR URL and HALT** — Wait for human to merge
+5. **Report URL in chat and HALT** — Wait for human to merge
 
 ### Sub-Issue Collection (CRITICAL)
 
@@ -194,7 +194,7 @@ Fixes #451
 
 ### Mandatory HALT
 
-- Agent MUST report PR URL
+- Agent MUST report URL in chat
 - Agent MUST HALT — wait for human to merge
 - Agent MUST NOT prompt for merge
 - Agent MUST NOT merge (PROHIBITED)
@@ -226,7 +226,7 @@ Fixes #451
 ### ✅ REQUIRED
 
 - Create PRs only
-- Report PR URL
+- Report URL in chat (NEVER to GitHub Issues)
 - Wait for human to merge
 - Delete branches AFTER merge confirmation
 
@@ -260,7 +260,7 @@ Wait for explicit "yes, create a PR" before proceeding.
 
 - Wait for explicit "create a PR" instruction
 - Squash to single commit before PR
-- Report PR URL
+- Report URL in chat (NEVER to GitHub Issues)
 - HALT after PR creation
 - Wait for human to merge
 
