@@ -551,6 +551,93 @@ PRs require the developer to say one of these EXACT phrases:
 
 ---
 
+## Critical Violation: Analysis → Implementation Without Authorization
+
+**⚠️ Finding a bug during analysis does NOT authorize fixing it.**
+
+### 🚫 FORBIDDEN
+- Implementing fixes discovered during analysis tasks
+- Creating branches/specs/PRs after finding bugs in analysis mode
+- Treating analysis requests as implementation authorization
+- "Vibe coding" — seeing a bug and immediately implementing a fix without spec
+
+### ✅ REQUIRED SEQUENCE
+
+| Request Type | Authorized Actions |
+|-------------|---------------------|
+| "check logs" | Read logs, report findings, HALT |
+| "analyze error" | Analyze, report root cause, HALT |
+| "why is this failing" | Investigate, report findings, HALT |
+| "check X" | Analyze X, report findings, HALT |
+| "fix this" | Create spec issue, get approval, implement |
+
+1. User requests analysis → Perform analysis ONLY
+2. Report findings (bugs, errors, issues) as factual observations
+3. HALT and wait for explicit authorization
+4. If user wants fix → Create spec issue, get approval, then implement
+
+### Why This Matters
+
+| Violation | Consequence |
+|-----------|-------------|
+| Implement during analysis | No spec to track changes |
+| No spec issue | No approval workflow |
+| Direct to implementation | Bypasses review process |
+| Vibe coding | Untracked, undocumented changes |
+
+**Discovery Protocol:**
+1. Bug discovered during analysis → Record as factual observation
+2. Create GitHub Issue for the discovery (if not exists)
+3. Report existence in chat
+4. HALT
+5. Wait for explicit "fix this" or "create spec"
+6. If authorized → Create spec, get approval, implement
+
+---
+
+## Critical Violation: Creating PRs Without Explicit Instruction
+
+**⚠️ Creating a PR without EXPLICIT developer instruction is a CRITICAL GUIDELINE VIOLATION.**
+
+PRs require the developer to say one of these EXACT phrases:
+- "create a PR"
+- "make a PR"
+- "push and create PR"
+- "let's get a PR up"
+
+**🚫 FORBIDDEN:**
+- Creating a PR after "approved" or "go" — these authorize implementation ONLY
+- Creating a PR after completing implementation — completion does NOT authorize PR creation
+- Asking "Ready for a PR?" or "Should I create a PR?" — just STOP and report completion
+- **Pushing branch to remote without "create a PR" instruction** — pushing is part of PR creation, NOT implementation
+
+**✅ REQUIRED:**
+- After completing implementation: report completion concisely, then STOP
+- Wait for EXPLICIT "create a PR" instruction
+- Only then: squash, push, create PR, report URL, STOP
+
+**The PR Timing Boundary:**
+
+| Authorization | What It Authorizes |
+|---------------|---------------------|
+| "approved" / "go" | Implementation ONLY |
+| Completion of implementation | Report + STOP |
+| "create a PR" | PR creation workflow |
+| Branch push | Part of PR creation, NOT implementation |
+
+**Correct Sequence:**
+1. "approved" → Implement → Report completion → STOP
+2. Wait for "create a PR" → Push branch → Provide compare URL → STOP
+3. Wait for "create a PR" → Squash → Create PR → Report URL → STOP
+4. Wait for human to merge → Close issues
+
+**See `pr-creation-workflow` skill for the full PR timing workflow including:**
+- Authorization boundary (what authorizes implementation vs PR)
+- Developer must test before PR
+- HALT after PR creation
+
+---
+
 ## Critical Violation: Closing Issues Before PR Merge
 
 **⚠️ Closing issues BEFORE the PR is merged is a CRITICAL GUIDELINE VIOLATION.**
