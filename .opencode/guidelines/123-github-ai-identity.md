@@ -13,34 +13,32 @@ ALL comments on issues and PRs MUST have a SINGLE byline at the END combining st
 <response content>
 
 ---
-🤖 <status-emoji> <status-text> by <AgentName> (<ModelID>)[: optional-context]
+🤖 <status-emoji> <status-text> by <AgentName> (<ModelID>)
 ```
 
 **Components (supplied dynamically at runtime):**
-- `<status-emoji>`: Status indicator (✅ ✨ 📝 ❌ 🔄 ↻ ⚠️ 🔍 📋)
+- `<status-emoji>`: Status indicator (✅ ✨ 📝 ❌ 🔄 ↻ ⚠️ 🔍 📋 ✎)
 - `<status-text>`: Status description (Completed, Created, Updated, Rejected, Superseded, Working)
 - `<AgentName>`: AI's actual name (e.g., `OpenCode Desktop`, `OpenCode`)
 - `<ModelID>`: Model identifier with provider (e.g., `ollama-cloud/glm-5`)
-- `[: optional-context]`: Context ONLY when useful (issue number, replacement reference, reason)
-  - **Progress comments**: Omit (content already describes the work)
-  - **Issue creation/completion**: Include issue number if useful
-  - **Rejection/Superseded**: Include reason or replacement reference
 
 **⚠️ CRITICAL: NEVER copy example values literally. Detect your own identity.**
 
 **Emoji Formatting:** Emoji must be PLAIN TEXT (NOT inside italic/bold formatting) to prevent render failures.
 
+**Rule:** Byline = WHO did WHAT. Details belong in comment body, not byline. No extra context.
+
 ### Examples
 
-**Task completion (no context needed):**
+**Task completion:**
 ```
 <summary content>
 
 ---
-🤖 ✅ Completed by OpenCode (ollama-cloud/glm-5)
+🤖 ✅ Completed by <AgentName> (<ModelID>)
 ```
 
-**Created issue (optional context):**
+**Created issue:**
 ```markdown
 [Issue body content]
 
@@ -48,19 +46,19 @@ ALL comments on issues and PRs MUST have a SINGLE byline at the END combining st
 
 > **Approval Tracking**: Approvals tracked via comments.
 
-🤖 ✨ Created by OpenCode (ollama-cloud/glm-5): Issue #462
+🤖 ✨ Created by <AgentName> (<ModelID>)
 ```
 
-**Updated issue (brief context):**
+**Updated issue:**
 ```
-🤖 ✨ Created by OpenCode (ollama-cloud/glm-5): Issue #462
-🤖 📝 Updated by OpenCode (ollama-cloud/glm-5): Added Phase 2
+🤖 ✨ Created by <AgentName> (<ModelID>)
+🤖 📝 Updated by <AgentName> (<ModelID>)
 ```
 
-**Rejected proposal (reason required):**
+**Rejected proposal:**
 ```
 ---
-🤖 ❌ Rejected by OpenCode (ollama-cloud/glm-5): Duplicate of #400
+🤖 ❌ Rejected by <AgentName> (<ModelID>)
 ```
 
 ---
@@ -71,14 +69,79 @@ ALL comments on issues and PRs MUST have a SINGLE byline at the END combining st
 |--------|-------|---------------|
 | Task Complete | ✅ | `🤖 ✅ Completed by <AgentName> (<ModelID>)` |
 | In Progress | ↻ | `🤖 ↻ Working by <AgentName> (<ModelID>)` |
-| Created | ✨ | `🤖 ✨ Created by <AgentName> (<ModelID>)[: Issue #N]` |
-| Updated | 📝 | `🤖 📝 Updated by <AgentName> (<ModelID>)[: description]` |
+| Created | ✨ | `🤖 ✨ Created by <AgentName> (<ModelID>)` |
+| Updated | 📝 | `🤖 📝 Updated by <AgentName> (<ModelID>)` |
+| Copy Editor | ✎ | `🤖 ✎ on behalf of <UserName>` |
 | Completed | ✅ | `🤖 ✅ Completed by <AgentName> (<ModelID>)` |
-| Rejected | ❌ | `🤖 ❌ Rejected by <AgentName> (<ModelID>): <reason>` |
-| Superseded | 🔄 | `🤖 🔄 Superseded by <AgentName> (<ModelID>): <replacement-issue>` |
-| Blocking | ⚠️ | `🤖 ⚠️ Blocking by <AgentName> (<ModelID>): <reason>` |
-| Analysis | 🔍 | `🤖 🔍 Analysis by <AgentName> (<ModelID>): <topic>` |
-| Decision | 📋 | `🤖 📋 Decision by <AgentName> (<ModelID>): <result>` |
+| Rejected | ❌ | `🤖 ❌ Rejected by <AgentName> (<ModelID>)` |
+| Superseded | 🔄 | `🤖 🔄 Superseded by <AgentName> (<ModelID>)` |
+| Blocking | ⚠️ | `🤖 ⚠️ Blocking by <AgentName> (<ModelID>)` |
+| Analysis | 🔍 | `🤖 🔍 Analysis by <AgentName> (<ModelID>)` |
+| Decision | 📋 | `🤖 📋 Decision by <AgentName> (<ModelID>)` |
+
+**Rule:** Byline = WHO did WHAT. Details belong in comment body, not byline.
+
+---
+
+## Copy Editor Byline (User-Authored Content)
+
+### When to Use
+
+Use the **Copy Editor** byline when posting content on behalf of users:
+- User asks agent to investigate a codebase and post findings to GitHub
+- User asks agent to analyze an issue and comment with results
+- User requests agent to update an issue with investigation results
+- Agent posts analysis, findings, or summaries on behalf of user
+
+### When NOT to Use
+
+Use standard bylines (Created, Completed, Updated) for:
+- Agent creates its own spec/issue for implementation work
+- Agent posts progress comments for its own implementation tasks
+- Agent creates issues for user-approved specs (those already have user attribution)
+- Agent performs independent implementation work
+
+### Copy Editor Byline Format
+
+**Format:**
+```
+<content posted on behalf of user>
+
+---
+🤖 ✎ on behalf of <UserName>
+```
+
+**Components:**
+- `✎`: Pencil emoji indicates editing/posting role (not authorship)
+- `on behalf of <UserName>`: The user who requested/owns the content
+
+**Rule:** Byline = WHO did WHAT. Details belong in comment body, not byline.
+
+### Examples
+
+**Investigation Results Posted for User:**
+```
+## Analysis: Still an Issue (2026-04-01)
+
+**Root Cause:** The `identifier` constraint in `Validations.scala` uses an overly restrictive regex pattern that rejects valid usernames containing hyphens.
+
+**Location:** `Validations.scala#L16-L25`
+
+**Recommendation:** Update regex to allow hyphens in username patterns.
+
+---
+🤖 ✎ on behalf of Michael Conrad
+```
+
+**Issue Comment Posted for User:**
+```
+## Status Update
+
+Based on the investigation, the feature is ready for implementation. The API endpoints are designed and the database schema is finalized.
+
+---
+🤖 ✎ on behalf of Michael Conrad
+```
 
 ---
 
@@ -88,17 +151,13 @@ ALL comments on issues and PRs MUST have a SINGLE byline at the END combining st
 
 | Action | Operation | Byline |
 |--------|-----------|--------|
-| Create issue | Append | `🤖 ✨ Created by <AgentName> (<ModelID>)[: Issue #N]` |
-| Update content | Append | `🤖 📝 Updated by <AgentName> (<ModelID>)[: description]` |
+| Create issue | Append | `🤖 ✨ Created by <AgentName> (<ModelID>)` |
+| Update content | Append | `🤖 📝 Updated by <AgentName> (<ModelID>)` |
 | Complete issue | Append | `🤖 ✅ Completed by <AgentName> (<ModelID>)` |
-| Reject issue | Append | `🤖 ❌ Rejected by <AgentName> (<ModelID>): <reason>` |
-| Supersede issue | Append | `🤖 🔄 Superseded by <AgentName> (<ModelID>): <replacement-issue>` |
+| Reject issue | Append | `🤖 ❌ Rejected by <AgentName> (<ModelID>)` |
+| Supersede issue | Append | `🤖 🔄 Superseded by <AgentName> (<ModelID>)` |
 
-**When to Include Context:**
-- **Progress/Task completion**: No context needed (content already describes the work)
-- **Issue creation**: Optional — use if issue number provides useful reference
-- **Content updates**: Brief description of what changed
-- **Rejection/Superseded**: Always include reason or replacement reference
+**Rule:** Byline = WHO did WHAT. Details belong in comment body, not byline. No extra context.
 
 **Why append-only:**
 - Same rule everywhere (no confusion)
@@ -114,9 +173,9 @@ ALL comments on issues and PRs MUST have a SINGLE byline at the END combining st
 
 > **Approval Tracking**: Approvals tracked via comments.
 
-🤖 ✨ Created by OpenCode (ollama-cloud/glm-5): Issue #462
-🤖 📝 Updated by OpenCode (ollama-cloud/glm-5): Added Phase 2
-🤖 ✅ Completed by OpenCode (ollama-cloud/glm-5)
+🤖 ✨ Created by <AgentName> (<ModelID>)
+🤖 📝 Updated by <AgentName> (<ModelID>)
+🤖 ✅ Completed by <AgentName> (<ModelID>)
 ```
 
 ---
