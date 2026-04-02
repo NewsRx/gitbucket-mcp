@@ -497,45 +497,42 @@ Before closing any issue (SPEC or Task), the AI agent MUST provide a final summa
 
 ## ⚠️ ENFORCED: Final HALT After Issue Closure
 
-**After closing issues and posting final summary, the agent MUST HALT.**
+**After cleanup confirmation, the agent MUST HALT.**
+
+**HALT = Stop all further action. No prompting, no questions, no next steps.**
 
 ### What HALT Means After Cleanup
 
 | Action | Status |
 |--------|--------|
-| Close issues | ✅ Done |
+| Close issues | ✅ Done (platform auto-closes via "Fixes #N") |
 | Delete branches | ✅ Done |
-| Post final summary | ✅ Done |
+| Confirm cleanup | ✅ Done |
 | Ask "What's next?" | 🚫 NEVER |
 | Prompt for next task | 🚫 NEVER |
 | Suggest new work | 🚫 NEVER |
 
+**The workflow is complete. The agent stops. The human decides what happens next.**
+
 ### Correct Final Output
 
 ```
-**Summary:**
-
-<What was implemented - 1-2 sentences describing the impact and stakeholder value>
-
-**Outcome:** <What changed for stakeholders>
-
-**PR:** https://github.com/<owner>/<repo>/pull/<number>
-
-**Issues Closed:** #<parent>, #<child1>, #<child2>, ...
-
-All tasks complete from this specification.
-
-[END - no further action]
+PR #81 merged. Branch `spec/github-issue-creation-skill` deleted. Cleanup complete.
 ```
+
+**That's it. One line. Then HALT.**
 
 ### 🚫 CRITICAL VIOLATIONS After Cleanup
 
 | Violation | Example |
 |-----------|---------|
+| Re-report PR details | "PR #81 merged. Summary: ..." |
+| Re-report issues | "Issues closed: #70, #71, #72..." |
 | Continue without new instruction | "Ready for next task?" |
 | Suggest next work | "Should I start on #75?" |
 | Prompt for anything | "What would you like me to do?" |
-| Not posting final summary | Missing executive summary |
+
+**The cleanup task is the END. HALT means STOP.**
 
 **The cleanup task is the END of the PR workflow. HALT means STOP.**
 

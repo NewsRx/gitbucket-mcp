@@ -25,27 +25,37 @@ Delete merged branches after PR merge, clean stale references, and verify reposi
 
 ## Procedure
 
-### Step 0: Final Executive Summary Template (CRITICAL)
+### Step 0: Cleanup Confirmation Output (CRITICAL)
 
-**The `cleanup` task is THE END of the PR workflow. It MUST produce a final executive summary and then HALT.**
+**The `cleanup` task is THE END of the PR workflow. It MUST produce a succinct confirmation and then HALT.**
 
-**Executive Summary Template:**
+**⚠️ CRITICAL: This is NOT a re-report of the PR.**
+
+The PR was already reported when it was created. Re-reporting PR details after merge is redundant and violates the workflow.
+
+**Cleanup Confirmation Template:**
 
 ```
-**Summary:**
-
-<What was implemented - 1-2 sentences describing the impact and stakeholder value>
-
-**Outcome:** <What changed for stakeholders>
-
-**PR:** https://github.com/<owner>/<repo>/pull/<number>
-
-**Issues Closed:** #<parent>, #<child1>, #<child2>, ...
-
-All tasks complete from this specification.
+PR #<number> merged. Branch `<branch-name>` deleted. Cleanup complete.
 ```
 
-**⚠️ CRITICAL: This summary is MANDATORY - it provides closure for the entire workflow.**
+**That's it. One line. Then HALT.**
+
+**Why succinct output:**
+- PR URL already provided when PR was created
+- Issues already discussed during implementation
+- User just confirmed merge - they know what PR it is
+- No need to rehash context - workflow is complete
+
+**🚫 NEVER After Cleanup:**
+- Re-reporting PR URL (already provided at PR creation)
+- Re-listing issues (already discussed during implementation)
+- Executive summary (already provided after implementation)
+- Asking "What's next?" or prompting for next task
+
+**✅ CORRECT After Cleanup:**
+- Confirm cleanup
+- HALT immediately
 
 ### Step 1: Verify PR Merge (CRITICAL - NO EXCEPTIONS)
 
@@ -379,7 +389,7 @@ NO parent/child structure check
 
 ## Final HALT (CRITICAL)
 
-**After closing issues and posting final summary, the agent MUST HALT.**
+**After cleanup confirmation, the agent MUST HALT.**
 
 **HALT = Stop all further action. No prompting, no questions, no next steps.**
 
@@ -387,9 +397,9 @@ NO parent/child structure check
 
 | Action | Status |
 |--------|--------|
-| Close issues | ✅ Done |
+| Close issues | ✅ Done (platform auto-closes via "Fixes #N") |
 | Delete branches | ✅ Done |
-| Post final summary | ✅ Done |
+| Confirm cleanup | ✅ Done |
 | Ask "What's next?" | 🚫 NEVER |
 | Prompt for next task | 🚫 NEVER |
 | Suggest new work | 🚫 NEVER |
@@ -399,30 +409,19 @@ NO parent/child structure check
 ### Correct Final Output
 
 ```
-**Summary:**
-
-Created `github-issue-creation` skill with sub-task architecture enforcing spec-first workflow. The skill validates specs before creation, checks for conflicts, and invokes auditor skills before approval.
-
-**Outcome:**
-
-The skill integrates with existing skill ecosystem (approval-gate, github-comments, github-sub-issues). Direct `github_issue_write` calls are now flagged as critical violations. All sub-issues (#71-74) closed after PR #81 merged.
-
-**PR:** https://github.com/NewsRx/gitbucket-mcp/pull/81
-
-**Issues Closed:** #70, #71, #72, #73, #74
-
-All tasks complete from this specification.
-
-[END - no further action]
+PR #81 merged. Branch `spec/github-issue-creation-skill` deleted. Cleanup complete.
 ```
+
+**That's it. One line. Then HALT.**
 
 ### 🚫 CRITICAL VIOLATIONS After Cleanup
 
 | Violation | Example |
 |-----------|---------|
+| Re-report PR details | "PR #81 merged. Summary: ..." |
+| Re-report issues | "Issues closed: #70, #71, #72..." |
 | Continue without new instruction | "Ready for next task?" |
 | Suggest next work | "Should I start on #75?" |
 | Prompt for anything | "What would you like me to do?" |
-| Not posting final summary | Missing executive summary |
 
 **The cleanup task is the END. HALT means STOP.**
