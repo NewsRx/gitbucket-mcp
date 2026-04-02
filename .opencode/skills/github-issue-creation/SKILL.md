@@ -1,3 +1,10 @@
+---
+name: github-issue-creation
+description: Issue Creation Enforcer ensuring all GitHub Issues follow spec-first workflow with validation, labels, and auditor integration. Invoked automatically before any issue is created.
+license: MIT
+compatibility: opencode
+---
+
 # Skill: github-issue-creation
 
 ## Overview
