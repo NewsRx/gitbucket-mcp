@@ -15,6 +15,23 @@ The sequence is:
 
 **DO NOT skip this task after implementation. DO NOT ask the developer if they want review. Just generate the compare URL.**
 
+## ⚠️ CRITICAL: This Task Is NOT Optional
+
+**Every feature branch push MUST be followed by review-prep. No exceptions.**
+
+**Why this is mandatory:**
+- Developer needs visibility into changes before deciding to create PR
+- Compare URL allows review via GitHub's superior diff viewer
+- Prevents premature PR creation
+- Ensures clear separation between "done implementing" and "create PR"
+
+**When to invoke:**
+- After ANY commit+push to a feature branch
+- After ANY file modifications are committed and pushed
+- Even if branch is "just tracking existing work"
+- Even if "no changes needed" was determined
+- Even if changes are documentation-only
+
 ### ⚠️ CRITICAL: Branch Must Be Pushed Before This Task
 
 **The `implementation` task is responsible for pushing the branch.**
