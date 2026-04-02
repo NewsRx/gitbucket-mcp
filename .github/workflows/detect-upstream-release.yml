@@ -33,204 +33,136 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          CURRENT="${{ steps.current-release.outputs.current_release }}"
+          
           # Fetch releases from GitBucket upstream
           RELEASES=$(curl -s \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             "https://api.github.com/repos/gitbucket/gitbucket/releases?per_page=100")
           
-          # Filter to stable releases only (no prereleases)
-          STABLE_RELEASES=$(echo "$RELEASES" | jq -r '[.[] | select(.prerelease == false)] | sort_by(.published_at) | reverse | .[0]')
+          # Filter to stable releases only (no prereleases) and sort by date
+          ALL_STABLE=$(echo "$RELEASES" | jq -r '[.[] | select(.prerelease == false)] | sort_by(.published_at)')
           
-          if [ -z "$STABLE_RELEASES" ] || [ "$STABLE_RELEASES" = "null" ]; then
-            echo "No stable releases found"
+          if [ "$CURRENT" = "none" ]; then
+            # First run - get all releases
+            NEW_RELEASES="$ALL_STABLE"
+          else
+            # Get releases newer than current
+            # Extract version number from current (e.g., "4.46.0" -> "4.46.0")
+            CURRENT_VERSION="$CURRENT"
+            
+            # Find releases after the current one
+            NEW_RELEASES=$(echo "$ALL_STABLE" | jq -r --arg cv "$CURRENT_VERSION" '
+              map(select(
+                (.tag_name | gsub("[^0-9.]"; "") | split(".") | map(tonumber)) > 
+                ($cv | gsub("[^0-9.]"; "") | split(".") | map(tonumber))
+              ))
+            ')
+          fi
+          
+          # Count new releases
+          RELEASE_COUNT=$(echo "$NEW_RELEASES" | jq 'length')
+          
+          if [ "$RELEASE_COUNT" -eq 0 ] || [ "$NEW_RELEASES" = "null" ]; then
+            echo "No new releases found"
             echo "has_new_release=false" >> $GITHUB_OUTPUT
+            echo "release_count=0" >> $GITHUB_OUTPUT
+            echo "releases=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          LATEST_VERSION=$(echo "$STABLE_RELEASES" | jq -r '.tag_name')
-          LATEST_PUBLISHED=$(echo "$STABLE_RELEASES" | jq -r '.published_at')
-          LATEST_HTML_URL=$(echo "$STABLE_RELEASES" | jq -r '.html_url')
+          echo "has_new_release=true" >> $GITHUB_OUTPUT
+          echo "release_count=$RELEASE_COUNT" >> $GITHUB_OUTPUT
+          echo "releases=$(echo "$NEW_RELEASES" | jq -c '.')" >> $GITHUB_OUTPUT
           
-          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
-          echo "latest_published=$LATEST_PUBLISHED" >> $GITHUB_OUTPUT
-          echo "latest_html_url=$LATEST_HTML_URL" >> $GITHUB_OUTPUT
-          
-          # Check if this is newer than tracked
-          CURRENT="${{ steps.current-release.outputs.current_release }}"
-          
-          if [ "$CURRENT" = "none" ] || [ "$LATEST_VERSION" != "$CURRENT" ]; then
-            echo "has_new_release=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_new_release=false" >> $GITHUB_OUTPUT
-          fi
+          echo "Found $RELEASE_COUNT new release(s) to process"
       
-      - name: Get previous release info
+      - name: Process releases
         if: steps.fetch-releases.outputs.has_new_release == 'true'
-        id: prev-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          CURRENT="${{ steps.current-release.outputs.current_release }}"
-          LATEST="${{ steps.fetch-releases.outputs.latest_version }}"
-          
-          if [ "$CURRENT" = "none" ]; then
-            # First run - get all releases to find the one before latest
-            RELEASES=$(curl -s \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer $GITHUB_TOKEN" \
-              "https://api.github.com/repos/gitbucket/gitbucket/releases?per_page=100")
-            
-            PREV_VERSION=$(echo "$RELEASES" | jq -r '[.[] | select(.prerelease == false)] | sort_by(.published_at) | reverse | .[1].tag_name // "none"')
-          else
-            PREV_VERSION="$CURRENT"
-          fi
-          
-          echo "prev_version=$PREV_VERSION" >> $GITHUB_OUTPUT
-      
-      - name: Get commit SHA for release
-        if: steps.fetch-releases.outputs.has_new_release == 'true'
-        id: commit-sha
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ steps.fetch-releases.outputs.latest_version }}"
-          
-          # Get commit SHA for the tag
-          TAG_INFO=$(curl -s \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/gitbucket/gitbucket/git/ref/tags/$VERSION")
-          
-          COMMIT_SHA=$(echo "$TAG_INFO" | jq -r '.object.sha')
-          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
-      
-      - name: Check for existing open issue
-        if: steps.fetch-releases.outputs.has_new_release == 'true'
-        id: check-issue
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ steps.fetch-releases.outputs.latest_version }}"
-          
-          # Check for existing open issue for this version
-          ISSUES=$(curl -s \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/issues?state=open&labels=upstream,api-sync")
-          
-          EXISTING=$(echo "$ISSUES" | jq -r --arg v "$VERSION" '.[] | select(.title | contains($v)) | .number')
-          
-          if [ -n "$EXISTING" ]; then
-            echo "Issue #$EXISTING already exists for $VERSION"
-            echo "issue_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "issue_exists=false" >> $GITHUB_OUTPUT
-          fi
-      
-      - name: Create release issue
-        if: |
-          steps.fetch-releases.outputs.has_new_release == 'true' &&
-          steps.check-issue.outputs.issue_exists != 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ steps.fetch-releases.outputs.latest_version }}"
-          COMMIT_SHA="${{ steps.commit-sha.outputs.commit_sha }}"
-          PUBLISHED="${{ steps.fetch-releases.outputs.latest_published }}"
-          HTML_URL="${{ steps.fetch-releases.outputs.latest_html_url }}"
-          PREV_VERSION="${{ steps.prev-release.outputs.prev_version }}"
+          RELEASES='${{ steps.fetch-releases.outputs.releases }}'
+          REPO="${{ github.repository }}"
           REPO_OWNER="${{ github.repository_owner }}"
           
-          # Format date
-          DATE=$(date -u +"%Y-%m-%d")
+          # Parse and process each release (sorted by date, oldest first)
+          echo "$RELEASES" | jq -c '.[]' | while read -r release; do
+            VERSION=$(echo "$release" | jq -r '.tag_name')
+            PUBLISHED=$(echo "$release" | jq -r '.published_at')
+            HTML_URL=$(echo "$release" | jq -r '.html_url')
+            
+            # Get commit SHA for the tag
+            TAG_INFO=$(curl -s \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/gitbucket/gitbucket/git/ref/tags/$VERSION")
+            
+            COMMIT_SHA=$(echo "$TAG_INFO" | jq -r '.object.sha')
+            
+            # Check for existing open issue for this version
+            EXISTING=$(gh issue list \
+              --repo "$REPO" \
+              --state open \
+              --label upstream,api-sync \
+              --search "$VERSION" \
+              --json number \
+              --jq '.[].number' 2>/dev/null || echo "")
+            
+            if [ -n "$EXISTING" ]; then
+              echo "Issue #$EXISTING already exists for $VERSION, skipping"
+              continue
+            fi
+            
+            echo "Creating issue for release $VERSION"
+            
+            # Format date
+            DATE=$(date -u +"%Y-%m-%d")
+            
+            # Create issue using gh CLI
+            ISSUE_URL=$(gh issue create \
+              --repo "$REPO" \
+              --title "[SPEC] Upstream GitBucket Release $VERSION - OpenAPI Spec Update" \
+              --body "$(cat <<EOF
+# Spec: Upstream GitBucket Release $VERSION - OpenAPI Spec Update
+
+STATUS: 1.1
+CREATED: $DATE
+
+---
+
+## Objective
+
+Update the OpenAPI specification to reflect API changes in GitBucket release $VERSION.
+
+---
+
+## Upstream Release Details
+
+| Field | Value |
+|-------|-------|
+| **Version** | $VERSION |
+| **Commit SHA** | $COMMIT_SHA |
+| **Release Date** | $PUBLISHED |
+| **Release Notes** | [$VERSION Release Notes]($HTML_URL) |
+
+## Source Repository for Probing
+
+**Repository URL:** https://github.com/gitbucket/gitbucket
+**Git Clone URL:** https://github.com/gitbucket/gitbucket.git
+**Default Branch:** master
+**Release Tag:** $VERSION
+**Build System:** Scala/sbt
+
+See the [Issue Template](.github/ISSUE_TEMPLATE/upstream-release.md) for analysis workflow.
+EOF
+            )" \
+              --label "api-sync,upstream,needs-approval" \
+              --assignee "$REPO_OWNER")
+            
+            echo "Created issue: $ISSUE_URL"
+          done
           
-          # Generate compare URL
-          if [ "$PREV_VERSION" != "none" ]; then
-            COMPARE_URL="https://github.com/gitbucket/gitbucket/compare/$PREV_VERSION...$VERSION"
-          else
-            COMPARE_URL="https://github.com/gitbucket/gitbucket/releases/tag/$VERSION"
-          fi
-          
-          # Create issue using template
-          ISSUE_BODY=$(cat << 'EOFMARKER'
-          ---
-          title: "[SPEC] Upstream GitBucket Release {VERSION} - OpenAPI Spec Update"
-          labels: ["api-sync","upstream","needs-approval"]
-          assignees: ["{REPO_OWNER}"]
-          ---
-          
-          # Spec: Upstream GitBucket Release {VERSION} - OpenAPI Spec Update
-          
-          STATUS: 1.1
-          CREATED: {DATE}
-          
-          ---
-          
-          ## Objective
-          
-          Update the OpenAPI specification to reflect API changes in GitBucket release {VERSION}.
-          
-          ---
-          
-          ## Upstream Release Details
-          
-          | Field | Value |
-          |-------|-------|
-          | **Version** | {VERSION} |
-          | **Commit SHA** | {COMMIT_SHA} |
-          | **Release Date** | {PUBLISHED_DATE} |
-          | **Release Notes** | [{VERSION} Release Notes]({RELEASE_NOTES_URL}) |
-          | **Compare View** | [Changes from {PREV_VERSION}]({COMPARE_URL}) |
-          
-          ## Source Repository for Probing
-          
-          **Repository URL:** https://github.com/gitbucket/gitbucket
-          **Git Clone URL:** https://github.com/gitbucket/gitbucket.git
-          **Default Branch:** master
-          **Release Tag:** {VERSION}
-          **Build System:** Scala/sbt
-          
-          See the [Issue Template](.github/ISSUE_TEMPLATE/upstream-release.md) for analysis workflow.
-          
-          EOFMARKER
-          )
-          
-          # Replace placeholders
-          ISSUE_BODY="${ISSUE_BODY//\{VERSION\}/$VERSION}"
-          ISSUE_BODY="${ISSUE_BODY//\{COMMIT_SHA\}/$COMMIT_SHA}"
-          ISSUE_BODY="${ISSUE_BODY//\{PUBLISHED_DATE\}/$PUBLISHED}"
-          ISSUE_BODY="${ISSUE_BODY//\{RELEASE_NOTES_URL\}/$HTML_URL}"
-          ISSUE_BODY="${ISSUE_BODY//\{PREV_VERSION\}/$PREV_VERSION}"
-          ISSUE_BODY="${ISSUE_BODY//\{COMPARE_URL\}/$COMPARE_URL}"
-          ISSUE_BODY="${ISSUE_BODY//\{DATE\}/$DATE}"
-          ISSUE_BODY="${ISSUE_BODY//\{REPO_OWNER\}/$REPO_OWNER}"
-          
-          # Create the issue
-          curl -s -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/issues" \
-            -d "$(jq -n \
-              --arg title "[SPEC] Upstream GitBucket Release $VERSION - OpenAPI Spec Update" \
-              --arg body "$ISSUE_BODY" \
-              --argjson labels '["api-sync","upstream","needs-approval"]' \
-              --argjson assignees "[\"$REPO_OWNER\"]" \
-              '{title: $title, body: $body, labels: $labels, assignees: $assignees}')"
-          
-          echo "Created issue for release $VERSION"
-      
-      - name: Update tracked release
-        if: steps.fetch-releases.outputs.has_new_release == 'true'
-        run: |
-          VERSION="${{ steps.fetch-releases.outputs.latest_version }}"
-          echo "$VERSION" > workflow-state/last_release.txt
-          
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Commit state file
-          git add workflow-state/last_release.txt
-          git commit -m "chore: update tracked release to $VERSION" || echo "No changes to commit"
-          git push
+          echo ""
+          echo "Processing complete. Note: State file NOT updated - AI agent will update after processing each release."
