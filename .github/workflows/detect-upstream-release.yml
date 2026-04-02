@@ -120,44 +120,23 @@ jobs:
             # Format date
             DATE=$(date -u +"%Y-%m-%d")
             
+            # Create issue body from template with variable substitution
+            ISSUE_BODY=$(sed \
+              -e "s/{VERSION}/$VERSION/g" \
+              -e "s/{COMMIT_SHA}/$COMMIT_SHA/g" \
+              -e "s/{PUBLISHED_DATE}/$PUBLISHED/g" \
+              -e "s/{RELEASE_NOTES_URL}/$HTML_URL/g" \
+              -e "s/{DATE}/$DATE/g" \
+              -e "s/{PREV_VERSION}/CURRENT/g" \
+              -e "s/{COMPARE_URL}/https:\/\/github.com\/gitbucket\/gitbucket\/compare\/CURRENT...$VERSION/g" \
+              -e "s/{REPO_OWNER}/$REPO_OWNER/g" \
+              .github/ISSUE_TEMPLATE/upstream-release.md)
+            
             # Create issue using gh CLI
             ISSUE_URL=$(gh issue create \
               --repo "$REPO" \
               --title "[SPEC] Upstream GitBucket Release $VERSION - OpenAPI Spec Update" \
-              --body "$(cat <<EOF
-# Spec: Upstream GitBucket Release $VERSION - OpenAPI Spec Update
-
-STATUS: 1.1
-CREATED: $DATE
-
----
-
-## Objective
-
-Update the OpenAPI specification to reflect API changes in GitBucket release $VERSION.
-
----
-
-## Upstream Release Details
-
-| Field | Value |
-|-------|-------|
-| **Version** | $VERSION |
-| **Commit SHA** | $COMMIT_SHA |
-| **Release Date** | $PUBLISHED |
-| **Release Notes** | [$VERSION Release Notes]($HTML_URL) |
-
-## Source Repository for Probing
-
-**Repository URL:** https://github.com/gitbucket/gitbucket
-**Git Clone URL:** https://github.com/gitbucket/gitbucket.git
-**Default Branch:** master
-**Release Tag:** $VERSION
-**Build System:** Scala/sbt
-
-See the [Issue Template](.github/ISSUE_TEMPLATE/upstream-release.md) for analysis workflow.
-EOF
-            )" \
+              --body "$ISSUE_BODY" \
               --label "api-sync,upstream,needs-approval" \
               --assignee "$REPO_OWNER")
             
