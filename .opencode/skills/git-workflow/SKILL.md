@@ -472,6 +472,52 @@ pre-work → implementation → review-prep → pr-creation → cleanup
 
 ## Cross-References
 
-- Related skills: `approval-gate` (authorization), `pr-creation-workflow` (PR timing)
+- Related skills: `approval-gate` (authorization), `pr-creation-workflow` (PR timing), `changelog-generator` (changelog generation)
 - Related guidelines: `110-git-branch-first.md`, `111-git-commit-workflow.md`, `113-git-pr-workflow.md`, `114-git-branch-cleanup.md`, `124-github-archive-workflow.md`
 - Session init: `000-session-init.md` (for GIT_OWNER, GIT_REPO, DEV_NAME, DEV_EMAIL)
+
+## Changelog Generation (Sub-Task Integration)
+
+**The changelog-generator skill MUST run as a sub-task during PR creation.**
+
+### Why Sub-Task Execution Is Critical
+
+The skill runs in an isolated context for **context isolation**:
+
+| What Happens in Sub-Task | What Returns to Main Context |
+|--------------------------|------------------------------|
+| Git commit analysis | Only: "CHANGELOG.md updated" |
+| Commit categorization logic | NOT: intermediate reasoning |
+| Technical → User-friendly translation | NOT: commit details |
+| Categorization reasoning | NOT: list of changes analyzed |
+| Output formatting | NOT: generated changelog text |
+| Noise filtering decisions | NOT: filtering logic |
+| Thinking tokens | Minimal result token only |
+
+### Sub-Task Invocation
+
+```
+/skill changelog-generator --since-last-release
+```
+
+When invoked:
+1. Sub-task loads its own context (skill + task specification)
+2. Sub-task analyzes commits, categorizes, generates changelog
+3. Sub-task writes CHANGELOG.md to filesystem
+4. Sub-task returns minimal result: "CHANGELOG.md updated with N entries"
+5. Main context stages CHANGELOG.md and proceeds with squash
+
+### Skip Directive
+
+Use `[skip changelog]` in commit message or PR title to skip changelog generation:
+- Last commit message (if squashing multiple commits)
+- PR title
+
+### Integration Point
+
+The changelog sub-task is invoked in `pr-creation.md` Step 1, **before** the squash step:
+
+1. Check for `[skip changelog]` directive
+2. Invoke `/skill changelog-generator --since-last-release`
+3. Stage result: `git add CHANGELOG.md`
+4. Continue with squash (includes changelog changes)

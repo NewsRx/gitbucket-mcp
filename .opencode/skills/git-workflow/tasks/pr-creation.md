@@ -111,7 +111,44 @@ Correct next step:
 To create PR: Say 'create a PR' explicitly, not as a question.
 ```
 
-### Step 1: Squash to Single Commit
+### Step 1: Changelog Generation
+
+**Invoke changelog-generator skill as sub-task for context isolation.**
+
+The skill MUST run as a sub-task (`/skill changelog-generator`) to prevent its thinking, output, and intermediate results from polluting the main session context.
+
+#### Check Skip Directive
+
+Before invoking the skill, check for `[skip changelog]` in:
+- Last commit message (if squashing multiple commits)
+- PR title
+
+If `[skip changelog]` present, skip to Step 2.
+
+#### Invoke Skill as Sub-Task
+
+```
+/skill changelog-generator --since-last-release
+```
+
+**Sub-Task Context Isolation:**
+- Skill runs in its own context (isolated thinking)
+- Skill analyzes commits, categorizes changes, generates changelog
+- Skill writes CHANGELOG.md to filesystem
+- Only minimal confirmation returns to main context
+- Main context sees: "CHANGELOG.md updated with N entries"
+
+#### Stage Changelog After Sub-Task
+
+After sub-task completes:
+
+```bash
+git add CHANGELOG.md
+```
+
+Then continue to Step 2 (squash) — changelog changes bundled with code changes.
+
+### Step 2: Squash to Single Commit
 
 **MANDATORY:** All PRs must have exactly ONE commit.
 
@@ -122,13 +159,13 @@ git commit -m "<descriptive message>" \
     --trailer "Co-authored-by: <Human-Name> <human-email>"
 ```
 
-### Step 2: Push to Remote
+### Step 3: Push to Remote
 
 ```bash
 git push --force-with-lease origin <branch>
 ```
 
-### Step 3: Collect Sub-Issues (Multi-Task Specs)
+### Step 4: Collect Sub-Issues (Multi-Task Specs)
 
 **For specs with sub-issues:**
 
@@ -152,7 +189,7 @@ No sub-issues needed. Include only parent issue.
 - Agent verifies closure AFTER PR merge via GitHub API
 - Only in edge case (platform fails) does agent manually close
 
-### Step 4: Create PR via GitHub MCP
+### Step 5: Create PR via GitHub MCP
 
 ```python
 github_create_pull_request(
@@ -176,7 +213,7 @@ Fixes #<child2>
 - Include ALL sub-issues for multi-task specs
 - Brief description of changes
 
-### Step 5: Report PR URL and HALT
+### Step 6: Report PR URL and HALT
 
 ### ⚠️ CRITICAL: PR URL Reporting is MANDATORY
 
