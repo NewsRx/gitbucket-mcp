@@ -281,6 +281,9 @@ See `.opencode/guidelines/085-engineering-approach.md` for complete requirements
 - **IMPLEMENT SCOPE CREEP** — Only implement what the spec explicitly requests. Never refactor "nearby" code, add "helper" functions, or fix "similar issues" not in the spec
 - **USE PROPER NOTEBOOK TOOLING** — Always use `the-notebook-mcp` tools (e.g., `the-notebook-mcp_notebook_read`, `the-notebook-mcp_notebook_edit_cell`). Never use shell redirects (`sed`, `>`, `cat`) on notebook content — this causes edit failures and corrupted state.
 - **USE GIT RESTORE ON EXTERNAL CHANGES** — `git restore` on externally-modified files destroys changes permanently. Always `git stash` first.
+- **SKIP REVIEW-PREP AFTER IMPLEMENTATION** — After implementation completes, ALWAYS push branch and generate compare URL. No exceptions. `review-prep` is automatic, not optional. See `git-workflow` skill.
+- **POST URL BEFORE SUMMARY IN CHAT** — Always report executive summary FIRST, then URL. URL appears LAST as actionable link. Developer needs context before clicking.
+- **MARK COMPLETE WITHOUT COMMIT/PUSH** — Implementation is NOT complete until changes are committed and pushed. `git status` MUST show empty working tree before marking done.
 
 ## Guideline Violations
 
