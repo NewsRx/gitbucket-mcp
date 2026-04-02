@@ -211,20 +211,38 @@ Use the compare view to analyze changes:
 
 ### AI Agent Responsibility
 
-After PR merge confirms successful implementation:
+After OpenAPI spec PR merge confirms successful implementation:
 
 1. ☐ Wait for PR merge confirmation (see `124-github-archive-workflow.md` for closure workflow)
-2. ☐ Update state file:
+2. ☐ **Create feature branch FIRST** (see `110-git-branch-first.md`):
+   ```bash
+   git checkout main && git pull origin main
+   git checkout -b chore/update-state-to-{VERSION}
+   ```
+3. ☐ Update state file:
    ```bash
    echo "{VERSION}" > workflow-state/last_release.txt
-   git add workflow-state/last_release.txt
-   git commit -m "chore: update state to {VERSION} after release processing"
-   git push
    ```
-3. ☐ Verify state file reflects processed version: `cat workflow-state/last_release.txt`
+4. ☐ Commit with co-author trailers:
+   ```bash
+   git add workflow-state/last_release.txt
+   git commit -m "chore: update state to {VERSION} after release processing" \
+       --trailer "Co-authored-by: <AI-Name> (<model-id>) <noreply@ai-service>" \
+       --trailer "Co-authored-by: <Human-Name> <human-email>"
+   ```
+5. ☐ Push and create PR:
+   ```bash
+   git push origin chore/update-state-to-{VERSION}
+   gh pr create --title "chore: update state to {VERSION}" \
+       --body "Updates last_release.txt after successful OpenAPI spec processing for {VERSION}"
+   ```
+6. ☐ Wait for human to merge PR
+7. ☐ Verify state file after merge: `cat workflow-state/last_release.txt`
 
 **CRITICAL:**
-- State file should ONLY be updated after successful PR merge
+- State file updates require PR workflow (see `113-git-pr-workflow.md`)
+- Branch-first is MANDATORY for ALL file modifications (see `110-git-branch-first.md`)
+- Even "chore" commits require feature branches and PRs
 - State semantics: "last processed version" (not "last detected")
 - This enables the workflow to show backlog via state lag
 
