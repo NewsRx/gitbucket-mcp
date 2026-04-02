@@ -239,19 +239,31 @@ Before implementing ANY subtask:
    parent = github_issue_read(method="get", issue_number=parent_issue)
    # Parse STATUS from body
    # STATUS format: "STATUS: X.Y" or "STATUS: completed"
+   # If STATUS not found, default to first subtask (1.1)
    ```
 
 2. **Extract authorized subtask:**
    - "approved: 1.2" → subtask 1.2
    - "approved" (no number) → check STATUS for current phase
+   - If STATUS not found → default to first subtask (1.1)
 
 3. **Verify match:**
-   - If authorized for X.Y and STATUS is X.Y → ✅ PROCEED
-   - If authorized for X.Y and STATUS is different → ⛔ HALT
-   - If STATUS is "completed" → ⛔ HALT (spec already complete)
+   - If authorized for X.Y → use X.Y (explicit override)
+   - If "approved" (no number) AND STATUS found → use STATUS value
+   - If "approved" (no number) AND STATUS not found → use first subtask (1.1)
+   - If subtask not in sub-issues list → HALT, report available subtasks
 
-4. **Report mismatch:**
-   "STATUS mismatch: authorized for 1.2 but STATUS is 2.1"
+4. **Report decision (MANDATORY - no silent halts):**
+   ```markdown
+   **STATUS Gate Verification:**
+   - Authorization: "approved" (no phase specified)
+   - STATUS field: X.Y (or "not found, defaulting to first subtask")
+   - Sub-issue: #NNN
+   - Proceeding with implementation
+   ```
+
+5. **If mismatch:**
+   POST report: "STATUS mismatch: authorized for X.Y but STATUS is Z.W. Please update STATUS or authorize correct subtask."
 
 ### Why STATUS Gate Matters
 
@@ -268,6 +280,8 @@ Before implementing ANY subtask:
 - Parallel execution of subtasks
 - Proceeding without STATUS verification
 - Skipping STATUS gate for "quick" subtasks
+- **Halting silently** - MUST report STATUS gate decision to user
+- **Assuming failure without reporting** - MUST explain what was checked and outcome
 
 ---
 

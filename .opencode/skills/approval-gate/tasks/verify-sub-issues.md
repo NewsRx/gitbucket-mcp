@@ -50,14 +50,31 @@ sub_issues = github_issue_read(method="get_sub_issues", issue_number=parent_issu
    parent = github_issue_read(method="get", issue_number=parent_issue)
    # Parse STATUS from body
    # STATUS format: "STATUS: X.Y" or "STATUS: completed"
+   # If STATUS not found, default to first subtask (1.1)
    ```
 
-3. Verify STATUS matches requested subtask:
-   - If authorized for X.Y and STATUS is X.Y → PROCEED
-   - If authorized for X.Y and STATUS is different → HALT
-   - Report mismatch: "STATUS mismatch: authorized for 1.2 but STATUS is 2.1"
+3. Determine which subtask to implement:
+   - If authorized for X.Y → use X.Y (explicit override)
+   - If "approved" (no number) AND STATUS found → use STATUS value
+   - If "approved" (no number) AND STATUS missing → use first subtask (1.1)
+   - POST COMMENT explaining which subtask is being implemented
 
-4. **Why STATUS Gate Matters:**
+4. Verify subtask exists:
+   - If subtask X.Y exists in sub-issues → PROCEED
+   - If subtask X.Y NOT in sub-issues → HALT and report: "Subtask X.Y not found. Available subtasks: [list]"
+
+5. Report to user (MANDATORY - no silent halts):
+   ```markdown
+   Proceeding to implement subtask X.Y.
+   
+   Authorization: "approved" (no phase specified)
+   STATUS: X.Y (or "not found, defaulting to first subtask")
+   Sub-issue: #NNN
+   
+   Starting implementation now.
+   ```
+
+6. **Why STATUS Gate Matters:**
    - Prevents parallel execution of subtasks
    - Ensures sequential workflow
    - Avoids git branch conflicts
@@ -90,10 +107,32 @@ github_sub_issue_write(
 
 | Scenario | Action |
 |----------|--------|
-| STATUS matches authorized subtask | ✅ PROCEED |
-| STATUS mismatch | ⛔ HALT - report mismatch |
+| STATUS matches authorized subtask | ✅ PROCEED - report which subtask |
+| STATUS mismatch | ⛔ HALT - report mismatch clearly |
 | STATUS is "completed" | ⛔ HALT - spec already complete |
+| STATUS not found + "approved" | ✅ PROCEED - default to first subtask (1.1), report decision |
+| STATUS not found + "approved: X.Y" | ✅ PROCEED - use specified X.Y, report decision |
 | Single-task spec (no STATUS) | ✅ PROCEED - no gate needed |
+| Subtask not in sub-issues list | ⛔ HALT - report available subtasks |
+
+## Mandatory Reporting (No Silent Halts)
+
+**Every STATUS gate check MUST report status to user:**
+
+1. Which subtask is being implemented
+2. Why that subtask was selected (STATUS value or default)
+3. Link to the sub-issue
+
+**Example report:**
+```markdown
+**STATUS Gate Verification:**
+- Authorization: "approved" (no phase specified)
+- STATUS field: Not found → Defaulting to first subtask (1.1)
+- Sub-issue: #473
+- Proceeding with implementation
+```
+
+**Never HALT silently.** Always explain what was checked and what the outcome is.
 
 ## Forbidden Actions
 
@@ -108,10 +147,12 @@ github_sub_issue_write(
 
 | Issue | Resolution |
 |-------|------------|
-| STATUS mismatch | Report to user, wait for STATUS update |
-| STATUS not found | Assume no STATUS gate (proceed with caution) |
-| Sub-issue not linked | Auto-create and link |
-| Single-task spec with STATUS | Ignore STATUS, proceed |
+| STATUS mismatch | POST report: "STATUS mismatch: authorized for X.Y but STATUS is Z.W. Please update STATUS or authorize correct subtask." |
+| STATUS not found | Default to first subtask (1.1), POST report: "STATUS not found. Defaulting to first subtask (1.1). Add 'STATUS: X.Y' to parent issue for tracking." |
+| Sub-issue not linked | Auto-create and link, POST report: "Created N sub-issues for phase tracking." |
+| Single-task spec with STATUS | Ignore STATUS, proceed, POST report: "Single-task spec, ignoring STATUS field." |
+| Subtask not in list | HALT, POST report: "Subtask X.Y not found. Available subtasks: [list]. Please authorize a valid subtask." |
+| Parent issue missing STATUS field | Default to first subtask (1.1), proceed, POST explanatory comment |
 
 ## Context Required
 
