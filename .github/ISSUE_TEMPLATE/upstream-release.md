@@ -33,89 +33,96 @@ Update the OpenAPI specification to reflect API changes in GitBucket release {VE
 
 **Repository URL:** https://github.com/gitbucket/gitbucket
 **Git Clone URL:** https://github.com/gitbucket/gitbucket.git
-**Default Branch:** master
+**Default Branch:** Discover from repository (run `git remote show origin` after clone)
 **Release Tag:** {VERSION}
-**Build System:** Scala/sbt
 
 ---
 
-## Code Analysis Tools and Techniques
+## Code Analysis Approach
 
-**⚠️ CRITICAL: Use code analysis tooling to perform thorough API analysis. Do NOT rely solely on release notes or web research.**
+**⚠️ CRITICAL: Source code comparison is the ONLY authoritative source for API changes.**
 
-### Required Analysis Techniques
+- **Do NOT trust release notes** - They may miss internal API changes or describe changes inaccurately
+- **Do NOT trust CHANGELOG** - GitBucket 4.42.1 CHANGELOG said "Fix LDAP issue" but source analysis found internal API signature changes in `getBranchesNoMergeInfo()`
+- **Do NOT trust migration guides** - They focus on user-visible changes, not API-level changes
+- **Do NOT trust documentation** - Documentation may be outdated, incomplete, or describe intended behavior rather than actual behavior
+- **TRUST ONLY** - Direct source code comparison between versions
 
-| Technique | Purpose | Commands/Approach |
-|-----------|---------|-------------------|
-| **Route Extraction** | Extract all API endpoints from controllers | `grep -rn 'get\("/api/v3\|post\("/api/v3\|put\("/api/v3\|patch\("/api/v3\|delete\("/api/v3' src/main/scala/gitbucket/core/controller/api/*.scala` |
-| **Version Diff** | Compare API files between versions | Clone both versions, use `diff -u <old-file> <new-file>` on each API controller |
-| **Endpoint Count** | Count total endpoints in each version | Count route definitions to detect additions/removals |
-| **Schema Diff** | Detect API model changes | Diff `src/main/scala/gitbucket/core/api/*.scala` files between versions |
-| **Build Analysis** | Check dependency changes | Analyze `build.sbt` for library version changes |
-| **Service Layer** | Check business logic changes | Examine `src/main/scala/gitbucket/core/service/*.scala` for API-impacting changes |
+### Analysis Philosophy
+
+The remote development team may reorganize the codebase, change directory structures, or even change implementation languages between releases. Therefore:
+
+1. **Discover structure dynamically** - Do not assume fixed paths
+2. **Search semantically** - Look for patterns that define API routes, models, and schemas
+3. **Adapt to the codebase** - Use the actual project structure found in each version
+4. **Verify with source only** - Compare actual code between versions; never rely on documentation describing changes
 
 ### Analysis Workflow
 
-1. **Clone both versions**:
+1. **Clone both versions:**
    ```bash
    git clone --depth 1 --branch {PREV_VERSION} https://github.com/gitbucket/gitbucket.git ./tmp/gitbucket-prev
    git clone --depth 1 --branch {VERSION} https://github.com/gitbucket/gitbucket.git ./tmp/gitbucket-current
    ```
 
-2. **Extract and count routes**:
-   ```bash
-   # Previous version
-   grep -rn -E 'get\("/api/v3|post\("/api/v3|put\("/api/v3|patch\("/api/v3|delete\("/api/v3' \
-     ./tmp/gitbucket-prev/src/main/scala/gitbucket/core/controller/api/*.scala \
-     ./tmp/gitbucket-prev/src/main/scala/gitbucket/core/controller/ApiController.scala | wc -l
+2. **Discover project structure:**
+   - Identify the implementation language and framework
+   - Locate build system files (discover what exists - don't assume specific files)
+   - Find API route definitions by searching for endpoint patterns appropriate to the discovered framework
+   - Find API models/schemas by searching for data structure definitions appropriate to the language
 
-   # Current version
-   grep -rn -E 'get\("/api/v3|post\("/api/v3|put\("/api/v3|patch\("/api/v3|delete\("/api/v3' \
-     ./tmp/gitbucket-current/src/main/scala/gitbucket/core/controller/api/*.scala \
-     ./tmp/gitbucket-current/src/main/scala/gitbucket/core/controller/ApiController.scala | wc -l
-   ```
+3. **Semantic search for API routes:**
+   - Search for HTTP method patterns combined with path definitions
+   - Look for route definition syntax appropriate to the language and framework discovered
+   - Common patterns vary by framework: `@GetMapping`, `@app.route`, `get("path", ...)`, `#[get("path")]`, etc.
+   - Discover the API path structure (versioned like `/api/v1`, unversioned like `/api`, or REST without prefix)
+   - Adapt search patterns to the actual language/framework/API structure found
 
-3. **Diff API controllers**:
-   ```bash
-   for file in ./tmp/gitbucket-prev/src/main/scala/gitbucket/core/controller/api/*.scala; do
-     filename=$(basename "$file")
-     diff -u "$file" "./tmp/gitbucket-current/src/main/scala/gitbucket/core/controller/api/$filename"
-   done
-   ```
+4. **Count and compare endpoints:**
+   - Extract all API endpoints from both versions
+   - Count total endpoints in each version
+   - Identify added, removed, or modified routes
 
-4. **Diff API models**:
-   ```bash
-   for file in ./tmp/gitbucket-prev/src/main/scala/gitbucket/core/api/*.scala; do
-     filename=$(basename "$file")
-     diff -u "$file" "./tmp/gitbucket-current/src/main/scala/gitbucket/core/api/$filename"
-   done
-   ```
+5. **Diff API-related files:**
+   - Compare files that define API routes between versions
+   - Compare files that define API models/schemas between versions
+   - Focus on semantic changes (parameter types, return types, endpoint paths)
 
-5. **Check service layer** (for behavior changes):
-   ```bash
-   diff -r ./tmp/gitbucket-prev/src/main/scala/gitbucket/core/service/ \
-           ./tmp/gitbucket-current/src/main/scala/gitbucket/core/service/
-   ```
-
-### Key Directories to Analyze
-
-| Directory | Purpose | Priority |
-|-----------|---------|----------|
-| `src/main/scala/gitbucket/core/controller/api/` | API route definitions | **CRITICAL** |
-| `src/main/scala/gitbucket/core/controller/ApiController.scala` | Root API endpoint | **CRITICAL** |
-| `src/main/scala/gitbucket/core/api/` | API models/schemas | **CRITICAL** |
-| `src/main/scala/gitbucket/core/service/` | Business logic | **HIGH** |
-| `build.sbt` | Dependencies and versions | **MEDIUM** |
-| `src/main/scala/gitbucket/core/controller/` | Web UI controllers | **LOW** (API only) |
+6. **Check behavior-impacting changes:**
+   - Service layer changes (business logic)
+   - Dependency changes in build files
+   - Authentication/authorization changes
 
 ### What to Look For
 
-- **Route additions**: New `get|post|put|patch|delete("/api/v3/...")` patterns
-- **Route removals**: Routes present in old version but missing in new
-- **Route modifications**: Changed route paths or parameters
-- **Model changes**: Case class changes in `ApiIssue.scala`, `ApiPullRequest.scala`, etc.
-- **Service changes**: Methods called by API controllers
-- **Dependency changes**: Library upgrades in `build.sbt` that may affect API behavior
+| Category | Search Approach |
+|----------|-----------------|
+| **Route additions** | New endpoint definitions not in previous version |
+| **Route removals** | Endpoints in previous version but missing in current |
+| **Route modifications** | Changed paths, parameters, or HTTP methods |
+| **Model changes** | Data structure changes affecting request/response schemas |
+| **Service changes** | Methods called by API controllers |
+| **Dependency changes** | Library upgrades affecting API behavior |
+
+### Discovery Process
+
+Before analyzing API changes, discover the project's actual structure, language, and framework. Do not assume specific directories, file names, or languages.
+
+**What to discover:**
+
+1. **Language and build system:** Identify what languages are used and how the project is built. Look for build configuration files, package managers, and source file extensions. Discover what exists, don't assume specific names.
+
+2. **API versioning scheme:** Discover how the API is structured - is it versioned (`/api/v1`, `/api/v2`) or unversioned (`/api` or no prefix)? Search for HTTP method patterns in route definitions to understand the routing style.
+
+3. **Route definition patterns:** Determine how API routes are defined in this project - annotations, function calls, router objects, decorators? Adapt search patterns to what you find.
+
+4. **Controller/handler locations:** Find where route definitions live by searching for common naming patterns (`*controller*`, `*api*`, `*routes*`, `*handlers*`) rather than assuming fixed paths.
+
+5. **Model/schema definitions:** Locate where request/response structures are defined. Look for data structure definitions appropriate to the discovered language.
+
+**How to discover:** Use file system exploration, grep for patterns, examine build files, and analyze directory structure. Adapt your approach based on what you find.
+
+**Critical:** The remote team may change languages, frameworks, directory structures, or naming conventions. Your discovery process must detect and adapt to whatever structure exists in each version.
 
 ---
 
@@ -151,12 +158,17 @@ Create `openapi-specs/v{VERSION}/api-diff.md` documenting:
 5. **Schema Changes** - Changes to request/response schemas
 6. **Authentication Changes** - Changes to auth requirements
 7. **Breaking Changes** - Changes that break backward compatibility
-8. **Internal Changes** - Formatting-only changes, refactorings with no API impact
+8. **Internal Changes** - Changes with no API impact (refactorings, formatting)
 9. **Performance Improvements** - Backend changes that improve API performance
 
-Use the compare view to analyze changes:
-- GitHub Compare: https://github.com/gitbucket/gitbucket/compare/{PREV_VERSION}...{VERSION}
-- Focus on `src/main/scala/gitbucket/core/api/` and `src/main/scala/gitbucket/core/controller/` directories
+**Format:** Keep api-diff.md minimal and focused on API changes visible to remote callers:
+- Endpoint paths
+- Request schemas
+- Response schemas
+
+**NOT:** Internal implementation changes (private methods, internal services)
+
+**⚠️ Source Verification Required:** All findings must come from direct source code comparison between versions. Do not rely on release notes, CHANGELOG, or documentation to describe API changes - they may be incomplete or inaccurate.
 
 ---
 
@@ -166,11 +178,13 @@ Use the compare view to analyze changes:
 
 1. ☐ Clone upstream repository: `git clone https://github.com/gitbucket/gitbucket.git`
 2. ☐ Checkout release tag: `git checkout {VERSION}`
-3. ☐ Identify API endpoints in source code using grep and diff
-4. ☐ Document API changes from previous version
-5. ☐ Note any BREAKING CHANGES or deprecated endpoints
-6. ☐ Create `openapi-specs/v{VERSION}/api-diff.md` documenting differences
-7. ☐ Verify findings against release notes (release notes may miss internal changes)
+3. ☐ Discover project structure (language, build system, directory layout)
+4. ☐ Identify API endpoints using semantic search adapted to discovered structure
+5. ☐ Compare source code directly between versions (ONLY source code is authoritative)
+6. ☐ Document API changes from direct source comparison
+7. ☐ Note any BREAKING CHANGES or deprecated endpoints
+8. ☐ Create `openapi-specs/v{VERSION}/api-diff.md` documenting differences
+9. ☐ If release notes mention API changes, verify each claim against source code
 
 ---
 

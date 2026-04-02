@@ -256,6 +256,8 @@ See `.opencode/guidelines/085-engineering-approach.md` for complete requirements
 - **SILENTLY HALT after completing a task**
 - Use PyCharm MCP tools for all file operations when available
 - **STASH EXTERNAL CHANGES FIRST** — Before ANY branch creation, `git status`. If ANY files modified, `git stash push -m "WIP: before <branch>"`, then VERIFY with `git stash list` and clean `git status`.
+- **RUN REVIEW-PREP AFTER PUSH** — After pushing a feature branch, ALWAYS invoke `git-workflow --task review-prep` to generate compare URL. No exceptions. This is NOT optional.
+- **PROVIDE EXEC SUMMARY BEFORE URL** — After creating a PR, ALWAYS report exec summary FIRST, then URL. Format: Summary paragraph, Outcome line, then PR URL. Never report just the URL.
 
 **🚫 NEVER:**
 - Write code/notebooks/configs/tests without approved spec
