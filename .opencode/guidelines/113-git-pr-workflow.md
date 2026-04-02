@@ -16,10 +16,9 @@ After implementation completes and BEFORE PR creation authorization:
    git push -u origin <branch-name>
    ```
 
-2. **Agent provides GitHub compare URL**:
-   ```
-   https://github.com/<owner>/<repo>/compare/main...<branch-name>
-   ```
+2. **Agent reports compare URL in CHAT ONLY** (NEVER to GitHub Issues):
+   - URLs go in chat dialog ONLY
+   - GitHub Issues receive completion comment WITHOUT URL
 
 3. **Developer reviews changes** via GitHub diff viewer
 4. **Developer decides** whether to create PR or request changes
@@ -27,10 +26,10 @@ After implementation completes and BEFORE PR creation authorization:
 6. **Agent creates PR** (squash, push, create PR, HALT)
 
 **Why This Matters:**
+- URLs in chat keep conversations clean
+- Issues remain focused on task tracking, not URLs
 - Developer can review changes before PR exists
 - Clear separation between "implementation done" and "PR requested"
-- No accidental PR creation without developer visibility
-- GitHub diff viewer is superior to local review
 
 ---
 

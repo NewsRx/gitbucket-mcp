@@ -90,7 +90,7 @@ You are an Authorization Gatekeeper. Your focus is ensuring all code changes fol
 
 1. Push feature branch to remote
 2. Generate compare URL for review
-3. Report completion with executive summary
+3. Report completion to issue (NO URL) and URL in chat
 4. HALT — do NOT create PR without explicit instruction
 5. WAIT for "create a PR" instruction
 

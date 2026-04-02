@@ -627,8 +627,8 @@ PRs require the developer to say one of these EXACT phrases:
 
 **Correct Sequence:**
 1. "approved" → Implement → Report completion → STOP
-2. Wait for "create a PR" → Push branch → Provide compare URL → STOP
-3. Wait for "create a PR" → Squash → Create PR → Report URL → STOP
+2. Wait for "create a PR" → Push branch → Report URL in chat → STOP
+3. Wait for "create a PR" → Squash → Create PR → Report URL in chat → STOP
 4. Wait for human to merge → Close issues
 
 **See `pr-creation-workflow` skill for the full PR timing workflow including:**
@@ -650,7 +650,7 @@ PRs require the developer to say one of these EXACT phrases:
 - Closing issues based on `git pull` fast-forward alone (MUST use GitHub API)
 
 **✅ REQUIRED SEQUENCE:**
-1. Complete implementation → Create PR → Report PR URL → **HALT**
+1. Complete implementation → Create PR → Report URL in chat → **HALT**
 2. Wait for human to review and merge PR
 3. User confirms "pr merged" → **Call `github_pull_request_read method=get` to verify**
 4. Verify `merged_at` timestamp or `state: "closed"` with merge
