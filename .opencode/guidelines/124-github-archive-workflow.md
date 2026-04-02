@@ -90,6 +90,74 @@ github_issue_write(method="update", issue_number=456, state="closed", state_reas
 
 ---
 
+## ⚠️ ENFORCED: Workflow State File Updates
+
+**Some workflows maintain state files that the AI agent must update after successful processing.**
+
+### When State Updates Are Required
+
+State file updates are required when:
+
+1. The workflow creates issues/tasks for the AI agent to process
+2. The workflow should NOT advance state when issues are created (to show backlog)
+3. The AI agent completes the work and needs to signal "last processed" to the workflow
+
+### State Update Workflow
+
+**For upstream-release workflow:**
+
+| Trigger | Action | File |
+|---------|--------|------|
+| Workflow creates issue | State unchanged (shows backlog) | `workflow-state/last_release.txt` |
+| AI agent processes issue | State updated after PR merge | `workflow-state/last_release.txt` |
+| PR merged and issue closed | Commit state file update | `workflow-state/last_release.txt` |
+
+**State Semantics:**
+
+| Before (Workflow-controlled) | After (AI-controlled) |
+|-------------------------------|-----------------------|
+| Last release detected | Last release processed |
+| Updated by workflow | Updated by AI agent |
+| Hides backlog (false "up to date") | Shows backlog via state lag |
+
+**Update Process:**
+
+1. **Wait for PR merge confirmation** (see Issue Closure Timing above)
+2. **Verify issue closed** via `github_issue_read method=get`
+3. **Update state file:**
+   ```bash
+   echo "{VERSION}" > workflow-state/last_release.txt
+   git add workflow-state/last_release.txt
+   git commit -m "chore: update state to {VERSION} after release processing"
+   git push
+   ```
+4. **Verify state file** reflects processed version
+
+**Critical Rules:**
+
+- ⚠️ **NEVER update state before PR merge** — state must remain at "last processed"
+- ⚠️ **NEVER update state in the same PR as implementation** — create separate commit
+- ⚠️ **State file is NOT for workflow to update** — AI agent's responsibility only
+- ⚠️ **State lag is intentional** — shows backlog of unprocessed releases
+
+**Template Integration:**
+
+Issue templates that require state updates should include a Phase 5 section:
+
+```markdown
+## Phase 5: State Update (Gated)
+
+### AI Agent Responsibility
+
+After PR merge confirms successful implementation:
+
+1. ☐ Wait for PR merge confirmation
+2. ☐ Update state file
+3. ☐ Verify state file reflects processed version
+```
+
+---
+
 ## ⚠️ ENFORCED: Parent/Child Issue Closure
 
 **Parent issues MUST NOT be closed while ANY child issues remain open.**

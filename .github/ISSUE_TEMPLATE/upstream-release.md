@@ -207,6 +207,31 @@ Use the compare view to analyze changes:
 
 ---
 
+## Phase 5: State Update (Gated)
+
+### AI Agent Responsibility
+
+After PR merge confirms successful implementation:
+
+1. ☐ Wait for PR merge confirmation (see `124-github-archive-workflow.md` for closure workflow)
+2. ☐ Update state file:
+   ```bash
+   echo "{VERSION}" > workflow-state/last_release.txt
+   git add workflow-state/last_release.txt
+   git commit -m "chore: update state to {VERSION} after release processing"
+   git push
+   ```
+3. ☐ Verify state file reflects processed version: `cat workflow-state/last_release.txt`
+
+**CRITICAL:**
+- State file should ONLY be updated after successful PR merge
+- State semantics: "last processed version" (not "last detected")
+- This enables the workflow to show backlog via state lag
+
+**See `.opencode/guidelines/124-github-archive-workflow.md` for complete issue closure workflow.**
+
+---
+
 > **Approval Tracking**: Approvals are tracked via GitHub Issue comments.
 
 ---
