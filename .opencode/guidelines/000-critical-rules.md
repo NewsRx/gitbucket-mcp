@@ -108,6 +108,118 @@ git checkout -b spec/<short-name>
 
 ---
 
+## Critical Violation: Skipping review-prep After Implementation
+
+**⚠️ Failing to invoke `review-prep` after implementation is a CRITICAL GUIDELINE VIOLATION.**
+
+### 🚫 FORBIDDEN
+
+- Marking implementation complete WITHOUT committing, pushing, and generating URL
+- Skipping `review-prep` because "no changes were made"
+- Skipping `review-prep` because "already pushed"
+- Skipping `review-prep` for documentation/guideline changes
+- Proceeding to next phase without URL in chat
+
+### ✅ REQUIRED
+
+After EVERY implementation:
+1. Commit all changes with proper trailers
+2. Push feature branch to remote
+3. Invoke `review-prep` automatically
+4. Generate GitHub compare URL
+5. Report exec summary + URL in chat (URL LAST)
+6. Post completion comment to issue (NO URL)
+7. HALT and wait for "create a PR"
+
+### Why This Matters
+
+| Violation | Consequence |
+|-----------|-------------|
+| No commit | Changes lost, no tracking |
+| No push | Remote has no branch, compare URL fails |
+| No URL | Developer cannot review changes |
+| No HALT | Premature PR creation or issue closure |
+| Wrong format | Developer lacks context before URL |
+
+**The `review-prep` task is invoked AUTOMATICALLY after implementation. There is NO decision point.**
+
+**See `git-workflow` skill for complete review-prep workflow.**
+
+---
+
+## Critical Violation: Wrong Chat Output Format
+
+**⚠️ Posting URL before executive summary in chat is a CRITICAL GUIDELINE VIOLATION.**
+
+### 🚫 FORBIDDEN
+
+```
+Compare URL: https://github.com/owner/repo/compare/main...branch
+
+**Summary:** Changes to skill files...
+**Outcome:** Added enforcement rules
+```
+
+### ✅ REQUIRED
+
+```
+**Summary:**
+
+Updated git-workflow skill to enforce automatic invocation...
+
+**Outcome:** Developers will now see compare URL after every implementation.
+
+Compare URL: https://github.com/owner/repo/compare/main...branch
+```
+
+### Why This Matters
+
+- Developer needs context BEFORE clicking URL
+- Executive summary explains business impact
+- Outcome states what changed for stakeholders
+- URL appears LAST as actionable link
+
+**See `git-workflow` skill → "Chat Output Format (CRITICAL)" section.**
+
+---
+
+## Critical Violation: Uncommitted/Unpushed Changes After Implementation
+
+**⚠️ Marking implementation complete WITHOUT committing and pushing is a CRITICAL GUIDELINE VIOLATION.**
+
+### 🚫 FORBIDDEN
+
+- Marking task complete when `git status` shows uncommitted changes
+- Skipping `git commit` because "changes are small"
+- Skipping `git push` because "branch exists"
+- Proceeding to review-prep without push verification
+
+### ✅ REQUIRED
+
+**Before marking any task complete:**
+
+```bash
+git status              # Verify changes are staged
+git add -A              # Stage all changes
+git commit -m "message" --trailer "Co-authored-by: ..." --trailer "Co-authored-by: ..."
+git push -u origin <branch>  # Push to remote
+git branch -vv          # Verify upstream is set
+```
+
+### Verification Checklist
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| Changes staged | `git status --porcelain` | Empty (all committed) |
+| Branch pushed | `git branch -vv` | Shows `[origin/branch]` |
+| Commits exist | `git log origin/main..HEAD --oneline` | Shows commits |
+
+**If ANY check fails → STOP. Fix and retry.**
+
+**See `git-workflow` skill → "Enforcement Checklist" sections.**
+
+---
+
 **Search guidelines:** Use `srclight_search_symbols` or `pycharm_search_in_files_by_text` to find relevant guidelines.
 
 ## Critical Violation: Inferring GitHub Owner from File Paths/Usernames
@@ -860,6 +972,118 @@ Every specification MUST include:
 - API changes between library versions cause silent failures
 - Incorrect parameter names waste debugging time
 - Outdated patterns accumulate technical debt
+
+---
+
+## Critical Violation: Skipping review-prep After Implementation
+
+**⚠️ Failing to invoke `review-prep` after implementation is a CRITICAL GUIDELINE VIOLATION.**
+
+### 🚫 FORBIDDEN
+
+- Marking implementation complete WITHOUT committing, pushing, and generating URL
+- Skipping `review-prep` because "no changes were made"
+- Skipping `review-prep` because "already pushed"
+- Skipping `review-prep` for documentation/guideline changes
+- Proceeding to next phase without URL in chat
+
+### ✅ REQUIRED
+
+After EVERY implementation:
+1. Commit all changes with proper trailers
+2. Push feature branch to remote
+3. Invoke `review-prep` automatically
+4. Generate GitHub compare URL
+5. Report exec summary + URL in chat (URL LAST)
+6. Post completion comment to issue (NO URL)
+7. HALT and wait for "create a PR"
+
+### Why This Matters
+
+| Violation | Consequence |
+|-----------|-------------|
+| No commit | Changes lost, no tracking |
+| No push | Remote has no branch, compare URL fails |
+| No URL | Developer cannot review changes |
+| No HALT | Premature PR creation or issue closure |
+| Wrong format | Developer lacks context before URL |
+
+**The `review-prep` task is invoked AUTOMATICALLY after implementation. There is NO decision point.**
+
+**See `git-workflow` skill for complete review-prep workflow.**
+
+---
+
+## Critical Violation: Wrong Chat Output Format
+
+**⚠️ Posting URL before executive summary in chat is a CRITICAL GUIDELINE VIOLATION.**
+
+### 🚫 FORBIDDEN
+
+```
+Compare URL: https://github.com/owner/repo/compare/main...branch
+
+**Summary:** Changes to skill files...
+**Outcome:** Added enforcement rules
+```
+
+### ✅ REQUIRED
+
+```
+**Summary:**
+
+Updated git-workflow skill to enforce automatic invocation...
+
+**Outcome:** Developers will now see compare URL after every implementation.
+
+Compare URL: https://github.com/owner/repo/compare/main...branch
+```
+
+### Why This Matters
+
+- Developer needs context BEFORE clicking URL
+- Executive summary explains business impact
+- Outcome states what changed for stakeholders
+- URL appears LAST as actionable link
+
+**See `git-workflow` skill → "Chat Output Format (CRITICAL)" section.**
+
+---
+
+## Critical Violation: Uncommitted/Unpushed Changes After Implementation
+
+**⚠️ Marking implementation complete WITHOUT committing and pushing is a CRITICAL GUIDELINE VIOLATION.**
+
+### 🚫 FORBIDDEN
+
+- Marking task complete when `git status` shows uncommitted changes
+- Skipping `git commit` because "changes are small"
+- Skipping `git push` because "branch exists"
+- Proceeding to review-prep without push verification
+
+### ✅ REQUIRED
+
+**Before marking any task complete:**
+
+```bash
+git status              # Verify changes are staged
+git add -A              # Stage all changes
+git commit -m "message" --trailer "Co-authored-by: ..." --trailer "Co-authored-by: ..."
+git push -u origin <branch>  # Push to remote
+git branch -vv          # Verify upstream is set
+```
+
+### Verification Checklist
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| Changes staged | `git status --porcelain` | Empty (all committed) |
+| Branch pushed | `git branch -vv` | Shows `[origin/branch]` |
+| Commits exist | `git log origin/main..HEAD --oneline` | Shows commits |
+
+**If ANY check fails → STOP. Fix and retry.**
+
+**See `git-workflow` skill → "Enforcement Checklist" sections.**
 
 ---
 

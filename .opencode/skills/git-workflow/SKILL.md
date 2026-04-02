@@ -34,6 +34,56 @@ You are a Git Workflow Enforcer. Your sole focus is ensuring all git operations 
 - `/skill git-workflow --task cleanup` - After PR merge confirmed
 - `/skill git-workflow` - Overview only
 
+## Automatic Invocation (CRITICAL)
+
+**⚠️ CRITICAL: This skill is ALWAYS invoked automatically. There is NO decision point.**
+
+### When This Skill Is Invoked
+
+| Trigger | Task | Timing |
+|---------|------|--------|
+| User says `approved` or `go` | `pre-work` | BEFORE any file modification |
+| Implementation completes | `review-prep` | AFTER all work done, BEFORE HALT |
+| User says `create a PR` | `pr-creation` | Only after explicit instruction |
+| User confirms `PR merged` | `cleanup` | Only after merge confirmed |
+
+### Automatic Sequence (NO ASKING)
+
+```
+Authorization received
+    ↓
+pre-work invoked AUTOMATICALLY (Phase 1)
+    ↓
+Implementation work done
+    ↓
+review-prep invoked AUTOMATICALLY (Phase 3) ← **MANDATORY, NO DECISION POINT**
+    ↓
+Push branch → Generate URL → HALT
+    ↓
+(Developer reviews)
+    ↓
+Developer says "create a PR" ← EXPLICIT instruction required
+    ↓
+pr-creation: Squash → Create PR → HALT
+```
+
+### 🚫 CRITICAL VIOLATION: Skipping Automatic Invocation
+
+**Skipping `review-prep` after implementation is a CRITICAL GUIDELINE VIOLATION.**
+
+| Wrong Behavior | Correct Behavior |
+|----------------|------------------|
+| Implementation done → HALT | Implementation done → `review-prep` → HALT |
+| Skip push and URL generation | ALWAYS push, ALWAYS generate URL, ALWAYS HALT |
+| "Done implementing" ends work | `review-prep` is part of implementation workflow |
+
+### What "Automatic" Means
+
+- **No asking**: Do not say "Run review-prep?" or "Push branch?"
+- **No prompting**: Do not say "Ready to push?" or "Generate URL?"
+- **No opt-out**: Developer cannot skip this phase
+- **Mandatory sequence**: Implementation → commit → push → review-prep → HALT
+
 ## Operating Protocol
 
 1. **Automatic invocation (mandatory):** This skill is referenced when:
@@ -48,6 +98,42 @@ You are a Git Workflow Enforcer. Your sole focus is ensuring all git operations 
    - Phase 3: Review Prep (mandatory, automatic) → `review-prep` task **NO DECISION POINT**
    - Phase 4: PR Creation (user-initiated) → `pr-creation` task
    - Phase 5: Branch Cleanup (after merge) → `cleanup` task
+
+## Chat Output Format (CRITICAL)
+
+**⚠️ CRITICAL: Chat output MUST have executive summary BEFORE the URL.**
+
+### Correct Format
+
+```
+**Summary:**
+
+<1-2 sentences describing the impact and stakeholder value.>
+
+**Outcome:** <What changed for stakeholders>
+
+Compare URL: https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
+```
+
+### 🚫 WRONG Format (CRITICAL VIOLATION)
+
+```
+Compare URL: https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
+
+**Summary:**
+...
+```
+
+**Why:** Developer needs context BEFORE clicking URL. Summary explains WHAT changed and WHY it matters.
+
+### Format Rules
+
+| Element | Requirement |
+|---------|-------------|
+| Executive summary | MUST appear first |
+| Outcome line | MUST appear after summary |
+| URL | MUST appear LAST |
+| URL in chat ONLY | NEVER post URL to GitHub Issues |
 
 ## Critical Workflow Sequence
 
@@ -94,6 +180,109 @@ cleanup: Verify merge via GitHub API → Close issues
 | Close issues without PR merge | Lost tracking, audit trail broken |
 | Skip GitHub API verification | Closing issues on unmerged PRs |
 | **Close issues directly for doc/guideline changes** | **CRITICAL - docs require full PR workflow** |
+
+## Common Violations (LEARN FROM THESE)
+
+**This exact failure pattern triggered this spec:**
+
+### Violation 1: Skipping review-prep After Implementation
+
+**What Happened:** Agent completed skill creation, marked task complete, but did not invoke `review-prep`.
+
+**Wrong Sequence:**
+```
+Implementation done
+    ↓
+Mark task complete
+    ↓
+HALT (no push, no URL, no review-prep)
+```
+
+**Correct Sequence:**
+```
+Implementation done
+    ↓
+git add -A && git commit (commit changes)
+    ↓
+git push -u origin <branch> (push branch)
+    ↓
+review-prep invoked AUTOMATICALLY
+    ↓
+Generate compare URL
+    ↓
+Report exec summary + URL in chat
+    ↓
+Post completion comment to issue (NO URL)
+    ↓
+HALT
+```
+
+**Why This Failed:**
+- No commit made → No changes tracked
+- No push → No remote branch
+- No URL → Developer cannot review
+- No visibility into what changed
+
+### Violation 2: Wrong Chat Output Format
+
+**What Happened:** Agent reported URL first, then summary.
+
+**Wrong Sequence:**
+```
+Compare URL: https://github.com/.../compare/main...branch
+
+**Summary:** Changes to skill files...
+**Outcome:** Added enforcement rules
+```
+
+**Correct Sequence:**
+```
+**Summary:** Updated git-workflow skill to enforce automatic...
+
+**Outcome:** Developers will now see compare URL after every implementation.
+
+Compare URL: https://github.com/.../compare/main...branch
+```
+
+**Why This Matters:**
+- Developer needs context before clicking URL
+- Summary explains business impact
+- Outcome states what changed for stakeholders
+- URL appears LAST as actionable link
+
+### Violation 3: Uncommitted/Unpushed Changes After Implementation
+
+**What Happened:** Agent marked complete but `git status` showed uncommitted changes.
+
+**Detection:**
+```bash
+git status --porcelain
+# Shows modified/untracked files
+```
+
+**Resolution:**
+```bash
+git add -A
+git commit -m "message" --trailer "Co-authored-by: ..." --trailer "Co-authored-by: ..."
+git push -u origin <branch>
+```
+
+**Why This Matters:**
+- Uncommitted changes = lost work
+- Unpushed commits = no remote visibility
+- Review URL requires pushed commits
+
+### Violation 4: No Enforcement Checklist
+
+**What Happened:** Agent skipped steps because there was no checklist to verify.
+
+**Fix:** Added enforcement checklist to `review-prep` task:
+- ✅ Branch pushed?
+- ✅ Commits squashed?
+- ✅ Temp files cleaned?
+- ✅ Compare URL generated?
+- ✅ Exec summary + URL in chat?
+- ✅ Completion comment to issue (NO URL)?
 
 ## Critical Rules
 

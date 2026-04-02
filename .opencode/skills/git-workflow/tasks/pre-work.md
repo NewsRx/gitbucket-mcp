@@ -138,3 +138,15 @@ Before proceeding, verify ALL:
 - Branch name follows convention (`spec/` or `feature/` prefix)
 
 **If ANY check fails → STOP and report.**
+
+## Enforcement Checklist
+
+**Before starting any work, verify:**
+
+- ✅ Authorization received (explicit `approved`, `go`, or `"#N approved"`)
+- ✅ Current branch is NOT `main` (or stash and create feature branch)
+- ✅ Working tree is clean (`git status --porcelain` returns empty)
+- ✅ Stash created if needed (`git stash list` shows entry)
+- ✅ Feature branch created from `main`
+
+**These checks are MANDATORY. If ANY check fails → STOP and report.**

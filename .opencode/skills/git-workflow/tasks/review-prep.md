@@ -248,6 +248,47 @@ Compare URL: https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-
 - Prevents premature PR creation
 - Clear separation between "done implementing" and "create PR"
 
+## Enforcement Checklist
+
+**Before invoking review-prep, verify:**
+
+- ✅ Implementation work is complete
+- ✅ All file changes are committed (`git status` shows clean)
+- ✅ Branch is pushed to remote (`git branch -vv` shows upstream)
+- ✅ Temp files are cleaned (no `./tmp/temp_*.py` or `./tmp/*.json`)
+- ✅ Compare URL generated correctly (`owner/repo/compare/main...branch`)
+- ✅ Chat output format correct (summary BEFORE URL)
+- ✅ Issue comment posted (NO URL in issue comment)
+
+**These checks are MANDATORY. If ANY check fails → STOP and report.**
+
+## When review-prep MUST Run
+
+**This task runs AFTER EVERY implementation. No exceptions.**
+
+| Scenario | Run review-prep? |
+|----------|------------------|
+| Code file modified | YES |
+| Documentation modified | YES |
+| Guidelines modified | YES |
+| Config file modified | YES |
+| Zero files modified | YES (still push, still generate URL) |
+| Branch already pushed | YES (verify push, generate URL) |
+| "No changes needed" determined | YES (still push, still generate URL for visibility) |
+
+**🚫 CRITICAL: Skipping this task is a CRITICAL GUIDELINE VIOLATION.**
+
+## Verification Steps
+
+**After review-prep completes, verify:**
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| Branch pushed | `git branch -vv` | Shows `[origin/branch]` |
+| Compare URL works | Open URL in browser | Shows diff |
+| Chat has summary | Check chat output | Exec summary + URL |
+| Issue has comment | Check GitHub issue | Completion comment (NO URL) |
+
 ## Correct vs Incorrect Workflow
 
 ### ✅ CORRECT Workflow
