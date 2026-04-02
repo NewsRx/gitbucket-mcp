@@ -70,7 +70,8 @@ git commit -m "WIP: <descriptive message>"
 
 ## Important Rules
 
-- **DO NOT squash until PR creation** - Multiple implementation commits are expected
+- **DO NOT squash during implementation** - Multiple implementation commits on feature branches are normal and acceptable
+- **Squashing is ONLY at PR creation time** - The `squash` in "squash-merge to main via PR" refers to PR merge, not feature branch development
 - **DO NOT create PR without explicit instruction** - PR requires explicit "create a PR"
 - **ALWAYS push after committing** - Push ensures GitHub compare works correctly
 

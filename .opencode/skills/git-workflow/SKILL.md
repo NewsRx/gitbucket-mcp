@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Handles pre-work git branch, git stash, work, git squash commit for PR, etc work as dictated by the guidelines. Automatically invoked when user approves implementation or requests PR creation.
+description: Handles pre-work git branch, git stash, work, git commit, and PR creation as dictated by the guidelines. Automatically invoked when user approves implementation or requests PR creation.
 license: MIT
 compatibility: opencode
 ---
@@ -9,11 +9,11 @@ compatibility: opencode
 
 ## Overview
 
-Git Workflow Enforcer ensuring all git operations follow the repository's strict branch-first, stash-first, squash-merge workflow. Invoked automatically before implementation begins and when PR creation is requested.
+Git Workflow Enforcer ensuring all git operations follow the repository's strict branch-first, stash-first workflow. Squashing happens ONLY at PR creation time, not during implementation. Invoked automatically before implementation begins and when PR creation is requested.
 
 ## Persona
 
-You are a Git Workflow Enforcer. Your sole focus is ensuring all git operations follow the repository's strict branch-first, stash-first, squash-merge workflow.
+You are a Git Workflow Enforcer. Your sole focus is ensuring all git operations follow the repository's strict branch-first, stash-first workflow. Squashing is ONLY for PR creation, not during feature branch development.
 
 ## Authorization Gate Enforcement
 
@@ -356,6 +356,107 @@ git push -u origin <branch>
 - ✅ Compare URL generated?
 - ✅ Exec summary + URL in chat?
 - ✅ Completion comment to issue (NO URL)?
+
+### Violation 5: Created PR Without "Create a PR" Instruction (CRITICAL)
+
+**What Happened (2026-04-02):**
+1. User said "fix the skill and guideline" (implementation instruction)
+2. Agent made changes, committed, pushed
+3. Agent created PR directly WITHOUT:
+   - Generating compare URL for review
+   - HALTing for review
+   - Waiting for "create a PR" instruction
+4. Only compare URL was provided AFTER user complained
+
+**Wrong Sequence:**
+```
+User: "fix the skill and guideline"
+    ↓
+Implementation done
+    ↓
+Created PR immediately (SKIPPED review-prep, SKIPPED HALT)
+    ↓
+Reported PR URL
+    ↓
+User: "and yet you still are not using the skills correctly"
+```
+
+**Correct Sequence:**
+```
+User: "fix the skill and guideline"
+    ↓
+Implementation done
+    ↓
+git commit && git push
+    ↓
+review-prep invoked AUTOMATICALLY
+    ↓
+Generate compare URL
+    ↓
+Report exec summary + URL in chat
+    ↓
+Post completion comment to issue (NO URL)
+    ↓
+HALT - Wait for developer review
+    ↓
+(Developer reviews via GitHub diff)
+    ↓
+Developer says "create a PR"
+    ↓
+pr-creation: Squash → Create PR → HALT
+```
+
+**Why This Failed:**
+- Agent treated implementation complete as PR authorization
+- Skipped automatic review-prep phase
+- No HALT for developer review
+- No waiting for explicit "create a PR"
+
+**Fix:** Added explicit enforcement in pr-creation.md Step 0 and strengthened review-prep.md warnings.
+
+### Violation 6: Executed Skill Without Following Its Steps
+
+**What Happened (2026-04-02):**
+1. User said "pr merged" (cleanup confirmation)
+2. Agent invoked git-workflow skill
+3. Agent loaded skill content but did NOT execute cleanup task
+4. Agent just reported completion and HALTed without proper workflow
+
+**Wrong Sequence:**
+```
+User: "pr merged"
+    ↓
+Agent invokes /skill git-workflow
+    ↓
+Agent loads skill content
+    ↓
+Agent HALTs without executing cleanup task
+    ↓
+User: "actually perform the appropriate skill"
+```
+
+**Correct Sequence:**
+```
+User: "pr merged"
+    ↓
+Agent invokes /skill git-workflow
+    ↓
+Agent EXECUTES cleanup task:
+    1. Verify PR merge via GitHub API
+    2. Switch to main
+    3. Delete merged branch
+    4. Clean up stale refs
+    5. Post succinct confirmation
+    ↓
+HALT
+```
+
+**Why This Failed:**
+- Agent treated skill invocation as reading documentation
+- Did not follow procedural steps
+- Skill is executable workflow, not just reference material
+
+**Fix:** Agent must EXECUTE the loaded skill, not just read it.
 
 ## Critical Rules
 

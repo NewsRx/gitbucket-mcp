@@ -33,6 +33,107 @@ After implementation completes and BEFORE PR creation authorization:
 
 ---
 
+## 🚫 CRITICAL: PR Creation Without Authorization
+
+**Creating a PR without explicit "create a PR" instruction is a CRITICAL GUIDELINE VIOLATION.**
+
+### Enforcement Requirements
+
+**PRs require EXPLICIT instruction:**
+- "create a PR"
+- "make a PR"
+- "push and create PR"
+- "let's get a PR up"
+
+**What does NOT authorize PR creation:**
+- "approved" or "go" → Authorizes implementation ONLY
+- Implementation complete → NOT PR authorization
+- "continue" or "proceed" → Ambiguous, not PR instruction
+- "fix the skill" → Implementation instruction, not PR instruction
+
+### Mandatory Sequence
+
+```
+Implementation complete
+    ↓
+review-prep invoked AUTOMATICALLY (Phase 3)
+    ↓
+Push branch → Generate compare URL → HALT
+    ↓
+(Developer reviews via GitHub diff)
+    ↓
+Developer says "create a PR" ← EXPLICIT instruction required
+    ↓
+pr-creation: Squash → Create PR → HALT
+```
+
+### What HALT Means After review-prep
+
+**HALT = Stop all action and wait for explicit instruction.**
+
+| Action | ✅ DO | 🚫 NEVER |
+|--------|-------|----------|
+| Report completion | Post exec summary + compare URL in chat | Skip reporting |
+| Post issue comment | Completion comment (NO URL) | Post URL to issue |
+| Wait for review | Stop and wait | Proceed to PR creation |
+| Wait for instruction | Silent halt | Ask "ready for PR?" |
+
+---
+
+## 🚫 CRITICAL: Automatic Skill Invocation
+
+**When a skill is invoked, EXECUTE it, not just read it.**
+
+### The Problem
+
+Skills are executable workflows, not reference documentation. When a skill is invoked:
+
+| Wrong Behavior | Correct Behavior |
+|----------------|------------------|
+| Load skill content | Load skill content |
+| Read the content | READ AND EXECUTE each step |
+| Halt without action | Follow procedural steps |
+| Report completion without doing work | Complete workflow then report |
+
+### Violation Example
+
+```
+User: "pr merged"
+    ↓
+Agent invokes /skill git-workflow
+    ↓
+Agent loads skill content
+    ↓
+Agent HALTS without executing cleanup task ← CRITICAL VIOLATION
+    ↓
+User: "actually perform the appropriate skill"
+```
+
+**Correct Behavior:**
+```
+User: "pr merged"
+    ↓
+Agent invokes /skill git-workflow
+    ↓
+Agent EXECUTES cleanup task:
+    1. Verify PR merge via GitHub API
+    2. Switch to main
+    3. Delete merged branch
+    4. Clean up stale refs
+    5. Post succinct confirmation
+    ↓
+HALT
+```
+
+### Why This Matters
+
+- Skills encapsulate procedural knowledge
+- Loading ≠ Executing
+- The workflow must be followed, not just understood
+- Halt happens AFTER execution, not during
+
+---
+
 ## PR Requirements
 
 - Reference issue: `Fixes #123` in PR description
