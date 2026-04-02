@@ -513,20 +513,10 @@ Before closing any issue (SPEC or Task), the AI agent MUST provide a final summa
 ### Correct Final Output
 
 ```
-**Summary:**
-
-<What was implemented - 1-2 sentences describing the impact and stakeholder value>
-
-**Outcome:** <What changed for stakeholders>
-
-**PR:** https://github.com/<owner>/<repo>/pull/<number>
-
-**Issues Closed:** #<parent>, #<child1>, #<child2>, ...
-
-All tasks complete from this specification.
-
-[END - no further action]
+PR #81 merged. Branch `spec/github-issue-creation-skill` deleted. Cleanup complete.
 ```
+
+**That's it. ONE LINE. Succinct confirmation. Then stop.**
 
 ### 🚫 CRITICAL VIOLATIONS After Cleanup
 

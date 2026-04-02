@@ -25,27 +25,17 @@ Delete merged branches after PR merge, clean stale references, and verify reposi
 
 ## Procedure
 
-### Step 0: Final Executive Summary Template (CRITICAL)
+### Step 0: Succinct Confirmation Template (CRITICAL)
 
-**The `cleanup` task is THE END of the PR workflow. It MUST produce a final executive summary and then HALT.**
+**The `cleanup` task is THE END of the PR workflow. It MUST produce a one-line succinct confirmation and then HALT.**
 
-**Executive Summary Template:**
+**Succinct Confirmation Template:**
 
 ```
-**Summary:**
-
-<What was implemented - 1-2 sentences describing the impact and stakeholder value>
-
-**Outcome:** <What changed for stakeholders>
-
-**PR:** https://github.com/<owner>/<repo>/pull/<number>
-
-**Issues Closed:** #<parent>, #<child1>, #<child2>, ...
-
-All tasks complete from this specification.
+PR #<number> merged. Branch `<branch-name>` deleted. Cleanup complete.
 ```
 
-**⚠️ CRITICAL: This summary is MANDATORY - it provides closure for the entire workflow.**
+**⚠️ CRITICAL: Do NOT re-report PR details or issue lists. The PR was already reported at creation time.**
 
 ### Step 1: Verify PR Merge (CRITICAL - NO EXCEPTIONS)
 
@@ -399,22 +389,10 @@ NO parent/child structure check
 ### Correct Final Output
 
 ```
-**Summary:**
-
-Created `github-issue-creation` skill with sub-task architecture enforcing spec-first workflow. The skill validates specs before creation, checks for conflicts, and invokes auditor skills before approval.
-
-**Outcome:**
-
-The skill integrates with existing skill ecosystem (approval-gate, github-comments, github-sub-issues). Direct `github_issue_write` calls are now flagged as critical violations. All sub-issues (#71-74) closed after PR #81 merged.
-
-**PR:** https://github.com/NewsRx/gitbucket-mcp/pull/81
-
-**Issues Closed:** #70, #71, #72, #73, #74
-
-All tasks complete from this specification.
-
-[END - no further action]
+PR #81 merged. Branch `spec/github-issue-creation-skill` deleted. Cleanup complete.
 ```
+
+**That's it. ONE LINE. Succinct confirmation. Then stop.**
 
 ### 🚫 CRITICAL VIOLATIONS After Cleanup
 
