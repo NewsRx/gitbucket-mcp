@@ -82,11 +82,40 @@ github_issue_write(method="update", issue_number=456, state="closed", state_reas
 4. **Call GitHub API to verify PR state** ← MANDATORY STEP
 5. Only after PR merge verified → Close the issue
 
+### Sub-Issue Closure Timing
+
+**Sub-issues MUST NOT be closed before PR merge.**
+
+| Wrong Behavior | Correct Behavior |
+|----------------|------------------|
+| Agent closes sub-issue after implementation | Platform closes via "Fixes #N" |
+| Sub-issue shows "completed" before PR merge | Sub-issue closes WHEN PR merges |
+| Tracks completion without code review | Tracks completion AFTER code review |
+
+**The platform (GitBucket/GitHub) closes issues automatically via "Fixes #N" annotations.**
+
+1. **Implement sub-issue** → Create PR with `Fixes #N` in description (NO manual sub-issue closure)
+2. **PR created** → Report URL, HALT
+3. **Human merges PR** → Platform automatically closes sub-issue
+4. **User confirms "pr merged"** → Agent verifies merge via GitHub API
+5. **Agent verifies sub-issues are closed** → API check (`state: "closed"`)
+6. **If sub-issue still open (edge case)** → Agent closes it manually
+7. **All sub-issues closed?** → Close parent issue
+
+**PR descriptions MUST include sub-issue numbers:**
+
+```markdown
+Fixes #86, #87, #88
+
+[PR body...]
+```
+
 ### Why This Matters
 
 - Issues closed before PR merge may need to be reopened if PR is rejected
 - Open issues accurately reflect work-in-progress state
 - Waiting ensures accurate state tracking
+- Sub-issues closed before PR merge lose review workflow tracking
 
 ---
 
