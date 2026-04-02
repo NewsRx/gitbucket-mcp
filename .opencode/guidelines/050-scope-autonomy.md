@@ -29,6 +29,30 @@ Agent is strictly an execution tool. All architectural/design decisions are the 
 
 ### 🚫 NEVER DO
 - Implementing any unrequested change — even if a "bug" or "better way" is discovered.
+- **NEVER implement during analysis.** Finding a bug authorizes REPORTING, not FIXING.
+- When a bug is discovered during analysis, STOP and report. Do not:
+  - Create branches
+  - Edit files
+  - Commit changes
+  - Create PRs
+  - Implement fixes
+- **NEVER treat analysis as authorization.** "Check X" = analyze and report, NOT "fix X".
+
+### Analysis vs Implementation Table
+
+| Request Type | Authorized Actions |
+|-------------|---------------------|
+| "check logs" | Read logs, report findings, HALT |
+| "analyze error" | Analyze, report root cause, HALT |
+| "why is this failing" | Investigate, report findings, HALT |
+| "fix this" | Create spec, get approval, implement |
+| "can you check X" | Analyze X, report findings, HALT |
+
+**Discovery Protocol:**
+1. User requests analysis → Perform analysis ONLY
+2. Report findings (bugs, errors, issues) as factual observations
+3. HALT and wait for explicit authorization
+4. If user wants fix → Create spec issue, get approval, then implement
 
 ## 4. Q&A and Feedback
 
