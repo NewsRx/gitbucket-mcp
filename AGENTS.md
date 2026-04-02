@@ -338,6 +338,7 @@ To use a skill, the agent loads it when relevant to the current task.
 | Before major release | `coherence-auditor --mode maintenance` | Verify guideline-skill coherence |
 | **Before creating GitHub Issue** | `github-issue-creation --task pre-creation` | **Validate spec, check for conflicts/superseded issues** |
 | After issue created | `github-issue-creation --task post-creation` | Invoke auditors, create sub-issues for multi-task specs |
+| User wants to create a new skill | `skill-creator` | Guide skill creation workflow, initialize templates |
 
 **Automatic Invocation:**
 - `git-workflow` skill is invoked automatically when:
