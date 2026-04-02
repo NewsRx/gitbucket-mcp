@@ -81,8 +81,8 @@ cleanup: Verify merge via GitHub API → Close issues
 
 | HALT Point | What Agent Does | What Agent WAITS For |
 |------------|----------------|----------------------|
-| After review-prep | Report URL in chat only + completion comment to issue (NO URL) | "create a PR" instruction |
-| After pr-creation | Report URL in chat only | "PR merged" confirmation |
+| After review-prep | Report exec summary + URL in chat, completion comment to issue (NO URL) | "create a PR" instruction |
+| After pr-creation | Report exec summary + PR URL in chat | "PR merged" confirmation |
 | After PR merged | Close issues | Next explicit instruction |
 
 ### 🚫 CRITICAL VIOLATIONS

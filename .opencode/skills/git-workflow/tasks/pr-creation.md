@@ -85,16 +85,24 @@ Fixes #<child2>
 
 ### ⚠️ CRITICAL: PR URL Reporting is MANDATORY
 
-**You MUST report the PR URL in chat:**
+**You MUST report exec summary + PR URL in chat:**
 
-1. **Chat Output:**
-   ```
-   PR created: https://github.com/<owner>/<repo>/pull/<number>
-   
-   <Brief implementation summary>
-   
-   Wait for human to merge.
-   ```
+```
+**Summary:**
+
+<1-2 sentences describing the impact and stakeholder value.>
+
+**Outcome:** <What changed for stakeholders>
+
+**PR URL:** https://github.com/<owner>/<repo>/pull/<number>
+
+Wait for human to merge.
+```
+
+**Format Requirements:**
+- Executive summary FIRST (provides context)
+- PR URL LAST (clickable link)
+- MUST include "Wait for human to merge"
 
 ### What If PR Creation Fails?
 
@@ -106,8 +114,8 @@ Fixes #<child2>
 
 ### Post-PR Creation Checklist
 
-- [ ] PR URL reported in chat
-- [ ] Brief implementation summary included
+- [ ] Exec summary posted in chat
+- [ ] PR URL posted in chat
 - [ ] HALT — waiting for human merge
 
 **🚫 NEVER:** Skip reporting PR URL, merge PR, or proceed without developer confirmation.
