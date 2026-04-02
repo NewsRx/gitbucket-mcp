@@ -20,7 +20,29 @@ Create pull request after explicit user instruction. Squash commits to single co
 
 ### Step 0: Verify PR Instruction (MANDATORY FIRST)
 
-**🚫 CRITICAL: PR creation requires EXPLICIT instruction.**
+**🚫 CRITICAL: This is an ENFORCEMENT GATE, not just documentation.**
+
+**If ANY check fails → STOP and report. DO NOT proceed.**
+
+#### Enforcement Gate (MUST PASS ALL)
+
+**Before creating ANY PR, verify ALL conditions:**
+
+```
+□ Condition 1: Explicit PR instruction detected
+  - "create a PR", "make a PR", "push and create PR", "let's get a PR up"
+  - Implementation complete alone does NOT satisfy this check
+  
+□ Condition 2: review-prep was completed
+  - Compare URL was generated and reported in chat
+  - Developer had opportunity to review via GitHub diff
+  
+□ Condition 3: Branch was pushed to remote
+  - git branch -vv shows [origin/branch]
+  - Compare URL will work correctly
+  
+If ANY condition NOT satisfied → STOP and report.
+```
 
 #### PR Instruction Verification
 
@@ -33,6 +55,7 @@ Create pull request after explicit user instruction. Squash commits to single co
    - "let's get a PR up"
    - "open a PR"
    - "create pull request"
+   - "pr" (shorthand)
    
    **What does NOT authorize PR creation (HALT):**
    
@@ -43,6 +66,7 @@ Create pull request after explicit user instruction. Squash commits to single co
    | Implementation complete | Does NOT authorize PR - wait for explicit instruction |
    | "continue" | Ambiguous - could mean next phase |
    | "proceed" | Ambiguous - could mean next task |
+   | "fix the skill and guideline" | Implementation instruction, NOT PR instruction |
 
 2. **Authorization scope table:**
 
@@ -62,6 +86,21 @@ Create pull request after explicit user instruction. Squash commits to single co
    | User says "approved" only | ⛔ HALT - "approved authorizes implementation, not PR. Wait for 'create a PR' instruction." |
    | Implementation complete, no PR instruction | ⛔ HALT - report completion, wait for PR instruction |
    | User asks "ready for PR?" | ⛔ HALT - question, not instruction |
+   | User says "fix X" (implementation only) | ⛔ HALT - implementation instruction, not PR instruction |
+
+#### Verification Checklist
+
+**BEFORE creating PR, confirm:**
+
+```
+✅ Explicit "create a PR" instruction present
+✅ review-prep completed (compare URL reported)
+✅ Developer had chance to review
+✅ Branch pushed to remote
+✅ Ready to squash and create PR
+```
+
+**If ANY checkbox unchecked → STOP and report what's missing.**
 
 #### HALT Messages
 
