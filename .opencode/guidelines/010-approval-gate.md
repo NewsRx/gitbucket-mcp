@@ -105,6 +105,67 @@ When bug report requires code changes:
 3. HALT immediately
 4. Wait for explicit `go` or `approved`
 
+## Skill Enforcement (CRITICAL)
+
+**⚠️ CRITICAL: Skills MUST enforce authorization — guidelines alone are insufficient.**
+
+### Why Skills Must Enforce
+
+- **Guidelines document** what agents should do
+- **Skills contain code** that actually executes
+- Agents have proven to bypass documented guidelines
+- Enforcement in code prevents bypass
+
+**This is not theoretical. This actually happened:**
+- User said "Continue IF you have next steps"
+- Agent interpreted this as authorization
+- Agent committed, pushed, created PR
+- Both implementation and PR timing authorizations were bypassed
+
+### Which Skills MUST Enforce
+
+| Skill | Authorization Check Required |
+|-------|------------------------------|
+| `git-workflow` `--task pre-work` | ✅ YES - Check explicit "approved"/"go" before branch creation |
+| `git-workflow` `--task pr-creation` | ✅ YES - Check explicit "create a PR" before PR creation |
+| `git-workflow` `--task review-prep` | ❌ NO - Automatic after implementation |
+| `git-workflow` `--task cleanup` | ❌ NO - Automatic after PR merge confirmed |
+| All other skills | ❌ NO - Not git operation related |
+
+### Enforcement Matrix
+
+| Scenario | Action |
+|----------|--------|
+| Explicit "approved"/"go" | PROCEED - explicit auth wins |
+| Label + no auth | HALT - wait for authorization |
+| No label + no auth | HALT - wait for authorization |
+| Conditional phrase | HALT - not explicit authorization |
+| Implementation complete | HALT - wait for "create a PR" |
+
+### What Skills MUST Check
+
+**For `pre-work` task:**
+1. Get issue context from invocation
+2. Query GitHub Issue for labels (`needs-approval`)
+3. Query GitHub Issue for comments (look for "approved", "go", #"N approved")
+4. Check for conditionals ("if", "when", "continue if")
+5. Apply enforcement matrix
+
+**For `pr-creation` task:**
+1. Check conversation for "create a PR" instruction
+2. Distinguish implementation auth ("approved") from PR auth ("create a PR")
+3. Apply enforcement matrix
+
+### Conditional Phrases Are NOT Authorization
+
+| Phrase | Why NOT Authorization |
+|--------|----------------------|
+| "continue if you have next steps" | CONDITIONAL - agent must have next steps OR ask |
+| "proceed when ready" | CONDITIONAL - agent must report ready |
+| "if you have a plan, continue" | CONDITIONAL - agent must present plan |
+| "should I do X?" | QUESTION - seeking permission |
+| Implementation complete | NOT an instruction |
+
 ## What This Guideline Does NOT Cover
 
 **The skill handles procedural workflow:**

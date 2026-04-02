@@ -16,13 +16,100 @@ Verify branch state, preserve changes, create feature branch BEFORE any implemen
 - Authorization is for the correct issue
 - Sub-issue structure verified (for multi-task specs)
 
-## Exit Criteria
-
-- Feature branch created from main
-- Working tree clean (stashed if needed)
-- Verified ready for implementation
-
 ## Procedure
+
+### Step 0: Verify Authorization (MANDATORY FIRST)
+
+**🚫 CRITICAL: This check MUST happen BEFORE any git operations.**
+
+#### Authorization Verification Protocol
+
+1. **Extract issue context:**
+   - Issue number from invocation context
+   - Check authorization is explicit (not conditional)
+
+2. **Query GitHub Issue:**
+   ```python
+   issue = github_issue_read(method="get", owner=OWNER, repo=REPO, issue_number=N)
+   labels = [l["name"] for l in issue["labels"]]
+   comments = github_issue_read(method="get_comments", owner=OWNER, repo=REPO, issue_number=N)
+   ```
+
+3. **Check for authorization:**
+   
+   **Explicit authorization (PROCEED):**
+   - User said "approved" or "go" in comment
+   - User said "#N approved" for THIS issue
+   - User said "approved: X.Y" for THIS issue
+   
+   **Conditional phrases (HALT - NOT authorization):**
+   - "continue if you have next steps"
+   - "proceed when ready"
+   - "if you have a plan, continue"
+   - "after analysis, proceed"
+   
+   **Question phrases (HALT - seeking permission):**
+   - "should I do X?"
+   - "would you like me to X?"
+   - "ready for you to continue"
+
+4. **Enforcement matrix:**
+
+   | Scenario | Action |
+   |----------|--------|
+   | `needs-approval` label + explicit "approved" | ✅ PROCEED - explicit auth wins |
+   | `needs-approval` label + NO auth found | ⛔ HALT - "Authorization required. Issue has needs-approval label." |
+   | NO label + explicit "approved" | ✅ PROCEED |
+   | NO label + NO auth found | ⛔ HALT - "Authorization required. Say 'approved' or 'go'." |
+   | Conditional phrase detected | ⛔ HALT - "Conditional phrase not authorization. Need explicit 'approved' or 'go'." |
+
+5. **What does NOT authorize implementation:**
+   
+   | Phrase | Reason |
+   |--------|--------|
+   | "continue" | Ambiguous - could mean analysis |
+   | "if you have next steps" | CONDITIONAL - not explicit |
+   | "proceed with X" | Ambiguous without "approved"/"go" |
+   | Analysis presented | NOT authorization |
+   | Spec created | NOT authorization |
+   | "should I do X?" | QUESTION - seeking permission |
+
+6. **Authorization scope:**
+   - Issue-bound: Applies ONLY to this issue
+   - Phase-bound: "approved: 1.2" means phase 1.2 only
+   - Session-bound: New session = new authorization needed
+
+#### HALT Messages
+
+**Missing authorization:**
+```
+Authorization required before proceeding.
+
+Issue #N has needs-approval label and no explicit 'approved' or 'go' comment.
+
+To authorize: Say 'approved' or 'go' in a comment.
+```
+
+**Conditional phrase detected:**
+```
+Conditional phrase detected - not explicit authorization.
+
+User said: "Continue if you have next steps, or ask for clarification."
+
+This requires agent to present next steps OR ask for clarification first.
+Cannot proceed without explicit 'approved' or 'go'.
+
+To authorize: Say 'approved' or 'go' explicitly.
+```
+
+**No authorization found:**
+```
+Authorization required before proceeding.
+
+No 'approved' or 'go' comment found on issue #N.
+
+To authorize: Say 'approved' or 'go' in a comment.
+```
 
 ### Step 1: Check Current Git State
 

@@ -16,13 +16,100 @@ Create pull request after explicit user instruction. Squash commits to single co
 - Implementation is complete
 - Developer has reviewed changes via compare URL
 
-## Exit Criteria
-
-- PR created via GitHub MCP
-- PR URL reported to user
-- Waiting for human merge
-
 ## Procedure
+
+### Step 0: Verify PR Instruction (MANDATORY FIRST)
+
+**🚫 CRITICAL: PR creation requires EXPLICIT instruction.**
+
+#### PR Instruction Verification
+
+1. **Check for PR instruction:**
+   
+   **Valid PR instructions (PROCEED):**
+   - "create a PR"
+   - "make a PR"
+   - "push and create PR"
+   - "let's get a PR up"
+   - "open a PR"
+   - "create pull request"
+   
+   **What does NOT authorize PR creation (HALT):**
+   
+   | Phrase | Reason |
+   |--------|--------|
+   | "approved" | Authorizes implementation ONLY, NOT PR creation |
+   | "go" | Authorizes implementation ONLY, NOT PR creation |
+   | Implementation complete | Does NOT authorize PR - wait for explicit instruction |
+   | "continue" | Ambiguous - could mean next phase |
+   | "proceed" | Ambiguous - could mean next task |
+
+2. **Authorization scope table:**
+
+   | Authorization | What It Authorizes |
+   |--------------|---------------------|
+   | `approved` / `go` | Implementation ONLY |
+   | `approved: X.Y` | Phase X.Y ONLY |
+   | Implementation complete | NOTHING - wait for "create a PR" |
+   | `create a PR` | PR creation workflow |
+   | `create pull request` | PR creation workflow |
+
+3. **Enforcement matrix:**
+
+   | Scenario | Action |
+   |----------|--------|
+   | User says "create a PR" | ✅ PROCEED with PR creation |
+   | User says "approved" only | ⛔ HALT - "approved authorizes implementation, not PR. Wait for 'create a PR' instruction." |
+   | Implementation complete, no PR instruction | ⛔ HALT - report completion, wait for PR instruction |
+   | User asks "ready for PR?" | ⛔ HALT - question, not instruction |
+
+#### HALT Messages
+
+**Implementation authorization is NOT PR authorization:**
+```
+PR creation requires explicit instruction.
+
+User said 'approved' which authorizes implementation ONLY, not PR creation.
+
+After implementation completes:
+1. Report completion (exec summary + compare URL)
+2. HALT and wait for developer review
+3. Wait for explicit 'create a PR' instruction
+
+To create PR: Say 'create a PR' or 'make a PR' explicitly.
+```
+
+**No PR instruction after implementation:**
+```
+Implementation complete. Awaiting PR instruction.
+
+Current state:
+- Implementation done
+- Branch pushed
+- Compare URL generated
+
+Before creating PR:
+1. Developer reviews changes via compare URL
+2. Developer says 'create a PR' explicitly
+
+To create PR: Say 'create a PR' when ready.
+```
+
+**Question detected (not instruction):**
+```
+Question detected - not PR instruction.
+
+User asked: "Ready for PR?"
+
+This is a question, not an instruction to create PR.
+
+Correct next step:
+1. Report completion (if not already done)
+2. Present compare URL (if not already done)
+3. HALT and wait for explicit 'create a PR'
+
+To create PR: Say 'create a PR' explicitly, not as a question.
+```
 
 ### Step 1: Squash to Single Commit
 
