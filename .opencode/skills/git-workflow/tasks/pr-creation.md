@@ -150,42 +150,62 @@ Correct next step:
 To create PR: Say 'create a PR' explicitly, not as a question.
 ```
 
-### Step 1: Changelog Generation
+### Step 1: Changelog Generation (MANDATORY SUB-TASK)
 
-**Invoke changelog-generator skill as sub-task for context isolation.**
+**⚠️ CRITICAL: This step EXECUTES the changelog-generator skill as a sub-task.**
 
-The skill MUST run as a sub-task (`/skill changelog-generator`) to prevent its thinking, output, and intermediate results from polluting the main session context.
+The skill MUST run as a sub-task to ensure context isolation - the main session will only see the final result, not the intermediate analysis.
 
-#### Check Skip Directive
+#### Step 1.1: Check Skip Directive
 
 Before invoking the skill, check for `[skip changelog]` in:
 - Last commit message (if squashing multiple commits)
 - PR title
 
-If `[skip changelog]` present, skip to Step 2.
+If `[skip changelog]` is present, proceed directly to Step 2 (skip changelog generation).
 
-#### Invoke Skill as Sub-Task
+#### Step 1.2: Execute Changelog Sub-Task (MANDATORY EXECUTION)
+
+**EXECUTE THIS COMMAND AS A SUB-TASK:**
 
 ```
 /skill changelog-generator --since-last-release
 ```
 
-**Sub-Task Context Isolation:**
-- Skill runs in its own context (isolated thinking)
-- Skill analyzes commits, categorizes changes, generates changelog
+**Why This Is Critical:**
+- Sub-task execution isolates the skill's thinking from main context
+- Prevents skill output from consuming main session tokens
+- Skill runs in its own context and writes CHANGELOG.md
+- Main context receives minimal confirmation only
+
+**Expected Result:**
+- Skill analyzes commits since last release
+- Skill categorizes changes (added, changed, deprecated, fixed, security)
+- Skill generates user-facing changelog entries
 - Skill writes CHANGELOG.md to filesystem
-- Only minimal confirmation returns to main context
-- Main context sees: "CHANGELOG.md updated with N entries"
+- Main context sees: "Changelog generated successfully" or similar confirmation
 
-#### Stage Changelog After Sub-Task
+#### Step 1.3: Stage Changelog Changes (MANDATORY)
 
-After sub-task completes:
+After the sub-task completes, stage the changelog:
 
 ```bash
 git add CHANGELOG.md
 ```
 
-Then continue to Step 2 (squash) — changelog changes bundled with code changes.
+**CRITICAL:** This happens BEFORE the squash in Step 2, ensuring changelog changes are included in the single commit.
+
+#### Context Isolation Benefits
+
+| What Happens in Sub-Task | What Returns to Main Context |
+|--------------------------|------------------------------|
+| Git commit analysis | Minimal confirmation only |
+| Commit categorization | NOT: intermediate reasoning |
+| Technical → User-friendly translation | NOT: commit details analyzed |
+| Noise filtering | NOT: generated text |
+| Thinking tokens consumed | Minimal result token only |
+
+Then continue to Step 2 (squash).
 
 ### Step 2: Squash to Single Commit
 
