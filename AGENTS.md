@@ -261,6 +261,7 @@ See `.opencode/guidelines/085-engineering-approach.md` for complete requirements
 
 **🚫 NEVER:**
 - Write code/notebooks/configs/tests without approved spec
+- **Create issues via direct `github_issue_write` calls** — ALWAYS invoke `github-issue-creation` skill to ensure validation, labels, and auditor integration
 - Interpret questions as authorization ("Should I do X?" = asking permission)
 - Proceed to next task after completing a task — HALT
 - Create plans inline in message body
@@ -332,6 +333,8 @@ To use a skill, the agent loads it when relevant to the current task.
 | Periodic coherence maintenance | `coherence-auditor --mode maintenance` | Detect guideline-skill drift |
 | After guideline/skill update | `coherence-auditor --mode maintenance` | Verify coherence after changes |
 | Before major release | `coherence-auditor --mode maintenance` | Verify guideline-skill coherence |
+| **Before creating GitHub Issue** | `github-issue-creation --task pre-creation` | **Validate spec, check for conflicts/superseded issues** |
+| After issue created | `github-issue-creation --task post-creation` | Invoke auditors, create sub-issues for multi-task specs |
 
 **Automatic Invocation:**
 - `git-workflow` skill is invoked automatically when:
