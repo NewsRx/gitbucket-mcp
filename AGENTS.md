@@ -405,6 +405,7 @@ To use a skill, the agent loads it when relevant to the current task.
 | **Before creating GitHub Issue** | `github-issue-creation --task pre-creation` | **Validate spec, check for conflicts/superseded issues** |
 | After issue created | `github-issue-creation --task post-creation` | Invoke auditors, create sub-issues for multi-task specs |
 | User wants to create a new skill | `skill-creator` | Guide skill creation workflow, initialize templates |
+| Building MCP servers | `mcp-builder` | 4-phase workflow for creating MCP servers with tools and resources |
 
 **Automatic Invocation:**
 - `git-workflow` skill is invoked automatically when:
