@@ -465,17 +465,33 @@ When implementing a multi-task spec (one with multiple phases/tasks):
 1. **First**: Call `github_issue_read method=get_sub_issues` on the parent issue
 2. **When empty**: AUTO-CREATE sub-issues at PHASE level (see `github-sub-issues` skill)
 3. **Then**: Verify the task being implemented is linked as a sub-issue
+4. **CRITICAL**: PROCEED DIRECTLY TO IMPLEMENTATION (NO HALT - start Phase 1 immediately)
+
+**⚠️ CRITICAL: Sub-issue creation is setup, not implementation completion.**
+
+Do NOT HALT after creating sub-issues. The authorization ("approved") applies to the entire implementation workflow, not just sub-issue setup. Creating sub-issues is a prerequisite check, not a stopping point.
 
 **🚫 FORBIDDEN:**
 - Implementing a phase that exists only as text in the parent issue body
 - Proceeding when `get_sub_issues` returns empty array for multi-task specs
 - Assuming markdown checkboxes = task tracking
 - Creating step-level sub-issues instead of phase-level
+- HALTing after sub-issue creation instead of proceeding to implementation
 
 **✅ REQUIRED:**
 - Sub-issues at PHASE level, not step level
 - Each phase as separate GitHub Issue linked via `github_sub_issue_write method=add`
 - Single-task specs are exempt from sub-issue requirement
+- PROCEED DIRECTLY to Phase 1 implementation after sub-issue creation
+
+### Enforcement Matrix
+
+| Situation | Action |
+|-----------|--------|
+| Sub-issues created for multi-task spec | PROCEED to Phase 1 implementation (NO HALT) |
+| Sub-issues existed before auth | PROCEED to implementation (NO HALT) |
+| Authorization received ("approved") | Covers entire workflow including sub-issue creation + all phases |
+| Sub-issue creation complete | START Phase 1 immediately (NO waiting for re-authorization) |
 
 **See `github-sub-issues` skill for complete workflow including:**
 - Single-task vs multi-task exemption
