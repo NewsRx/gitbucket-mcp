@@ -154,13 +154,11 @@ Compare: {COMPARE_URL}
             commit_sha="abc123",
             published_date="2024-04-01T00:00:00Z",
             release_notes_url="https://example.com/release",
-            repo_owner="testuser",
             prev_version="4.45.0",
         )
 
         self.assertIn("Release 4.46.0", result)
         self.assertIn("Date: 2024-04-01", result)
-        self.assertIn("Owner: testuser", result)
         self.assertIn(
             "https://github.com/gitbucket/gitbucket/compare/4.45.0...4.46.0", result
         )
@@ -174,7 +172,6 @@ Compare: {COMPARE_URL}
             commit_sha="abc",
             published_date="2024-04-01",
             release_notes_url="https://example.com",
-            repo_owner="user",
         )
         self.assertEqual(result.count("4.46.0"), 3)
 
@@ -187,7 +184,6 @@ Compare: {COMPARE_URL}
             commit_sha="abc",
             published_date="2024-04-01",
             release_notes_url="https://example.com",
-            repo_owner="user",
             prev_version="CURRENT",
         )
         self.assertIn("CURRENT...4.46.0", result)
@@ -288,7 +284,6 @@ class TestEdgeCases(unittest.TestCase):
             commit_sha="abc",
             published_date="2024-04-01",
             release_notes_url="https://example.com",
-            repo_owner="user",
         )
         self.assertEqual(result, "No variables here")
 

@@ -272,7 +272,6 @@ def substitute_template(
     commit_sha: str,
     published_date: str,
     release_notes_url: str,
-    repo_owner: str,
     prev_version: str = "CURRENT",
 ) -> str:
     """
@@ -284,7 +283,6 @@ def substitute_template(
         commit_sha: Git commit SHA for the release tag
         published_date: ISO date string
         release_notes_url: URL to release notes
-        repo_owner: Repository owner for assignee
         prev_version: Previous version for compare URL (default: "CURRENT")
 
     Returns:
@@ -311,7 +309,6 @@ def substitute_template(
         result = result.replace("{DATE}", date)
         result = result.replace("{PREV_VERSION}", prev_version)
         result = result.replace("{COMPARE_URL}", compare_url)
-        result = result.replace("{REPO_OWNER}", repo_owner)
 
         return result
 
@@ -423,9 +420,7 @@ def check_existing_issue(repo: str, version: str) -> Optional[int]:
         return None
 
 
-def gh_issue_create(
-    repo: str, title: str, body: str, labels: list[str], assignee: str
-) -> str:
+def gh_issue_create(repo: str, title: str, body: str, labels: list[str]) -> str:
     """
     Create GitHub issue using gh CLI.
 
@@ -434,7 +429,6 @@ def gh_issue_create(
         title: Issue title
         body: Issue body
         labels: Labels to apply
-        assignee: Assignee username
 
     Returns:
         Issue URL
@@ -454,8 +448,6 @@ def gh_issue_create(
         body,
         "--label",
         ",".join(labels),
-        "--assignee",
-        assignee,
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -473,7 +465,6 @@ def create_release_issue(
     repo: str,
     release: dict,
     template: str,
-    repo_owner: str,
     prev_version: str = "CURRENT",
 ) -> str:
     """
@@ -484,7 +475,6 @@ def create_release_issue(
         repo: Target repository (owner/name)
         release: Release dictionary with tag_name, published_at, html_url
         template: Issue template content
-        repo_owner: Repository owner for assignee
         prev_version: Previous version for compare URL
 
     Returns:
@@ -507,7 +497,6 @@ def create_release_issue(
         commit_sha=commit_sha,
         published_date=published_date,
         release_notes_url=html_url,
-        repo_owner=repo_owner,
         prev_version=prev_version,
     )
 
@@ -519,7 +508,6 @@ def create_release_issue(
         title=title,
         body=body,
         labels=["api-sync", "upstream", "needs-approval"],
-        assignee=repo_owner,
     )
 
     logger.info(f"Created issue: {issue_url}")
@@ -531,7 +519,6 @@ def process_releases(
     repo: str,
     releases: list[dict],
     template: str,
-    repo_owner: str,
     dry_run: bool = False,
 ):
     """
@@ -542,7 +529,6 @@ def process_releases(
         repo: Target repository (owner/name)
         releases: List of release dictionaries sorted oldest first
         template: Issue template content
-        repo_owner: Repository owner for assignee
         dry_run: If True, log actions without creating issues
     """
     # Process from oldest to newest
@@ -569,19 +555,13 @@ def process_releases(
                 f"DRY RUN: Would create issue for {version} (compare with {prev_version})"
             )
         else:
-            try:
-                create_release_issue(
-                    token=token,
-                    repo=repo,
-                    release=release,
-                    template=template,
-                    repo_owner=repo_owner,
-                    prev_version=prev_version,
-                )
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Failed to create issue for {version}: {e.stderr}")
-                # Continue processing other releases
-                continue
+            create_release_issue(
+                token=token,
+                repo=repo,
+                release=release,
+                template=template,
+                prev_version=prev_version,
+            )
 
     logger.info(f"Processing complete. Processed {len(releases)} release(s)")
 
@@ -635,14 +615,12 @@ def main():
         logger.error(f"Invalid repository format: {repo}")
         sys.exit(1)
 
-    repo_owner, repo_name = repo_parts
-
     # Resolve paths
     project_root = Path(__file__).resolve().parent.parent
     state_file = project_root / args.state_file
     template_file = project_root / ".github" / "ISSUE_TEMPLATE" / "upstream-release.md"
 
-    logger.info(f"Scanning for releases in {repo_owner}/{repo_name}")
+    logger.info(f"Scanning for releases in {repo}")
     logger.info(f"State file: {state_file}")
     logger.info(f"Template: {template_file}")
 
@@ -660,7 +638,7 @@ def main():
     template = load_template(template_file)
 
     # Process releases
-    process_releases(token, repo, releases, template, repo_owner, args.dry_run)
+    process_releases(token, repo, releases, template, args.dry_run)
 
     logger.info("Release detection complete")
     logger.info(

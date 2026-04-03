@@ -1,7 +1,6 @@
 ---
 title: "[SPEC] Upstream GitBucket Release {VERSION} - OpenAPI Spec Update"
 labels: ["api-sync","upstream","needs-approval"]
-assignees: ["{REPO_OWNER}"]
 ---
 
 # Spec: Upstream GitBucket Release {VERSION} - OpenAPI Spec Update
