@@ -97,6 +97,7 @@ If ANY condition NOT satisfied → STOP and report.
 ✅ review-prep completed (compare URL reported)
 ✅ Developer had chance to review
 ✅ Branch pushed to remote
+✅ Changelog generated OR [skip changelog] directive present
 ✅ Ready to squash and create PR
 ```
 
@@ -150,6 +151,30 @@ Correct next step:
 To create PR: Say 'create a PR' explicitly, not as a question.
 ```
 
+**Changelog missing or not staged:**
+```
+⛔ HALT: Changelog verification failed.
+
+Expected: CHANGELOG.md staged for commit (M CHANGELOG.md in git status)
+Found: No changelog changes detected
+
+This occurs when:
+1. Changelog generation was skipped (Step 1.2 not executed)
+2. Changelog was generated but not staged (Step 1.3 skipped)
+3. [skip changelog] directive not present
+
+Previous PRs (#109, #114, #118, #119, #120) merged without changelog updates
+due to missing this verification checkpoint.
+
+Correct sequence:
+1. Step 1.2: Run /skill changelog-generator --since-last-release
+2. Step 1.3: Run git add CHANGELOG.md
+3. Step 1.4: Verify git status shows "M CHANGELOG.md"
+4. Continue to Step 2 (squash)
+
+To skip changelog: Add [skip changelog] to commit message or PR title.
+```
+
 ### Step 1: Changelog Generation (MANDATORY SUB-TASK)
 
 **⚠️ CRITICAL: This step EXECUTES the changelog-generator skill as a sub-task.**
@@ -194,6 +219,50 @@ git add CHANGELOG.md
 ```
 
 **CRITICAL:** This happens BEFORE the squash in Step 2, ensuring changelog changes are included in the single commit.
+
+#### Step 1.4: Verify Changelog Staged (ENFORCEMENT GATE)
+
+**BEFORE proceeding to Step 2, verify changelog was actually staged:**
+
+```bash
+# Check if CHANGELOG.md is staged (M = modified in index)
+git status --porcelain CHANGELOG.md
+```
+
+**Expected Result:**
+- `M CHANGELOG.md` OR `A CHANGELOG.md` (staged for commit)
+- OR `[skip changelog]` directive was present (proceed to Step 2)
+
+**If changelog NOT staged and NO skip directive:**
+
+```
+⛔ ENFORCEMENT GATE FAILED: Changelog not staged
+
+The changelog-generator skill was invoked but CHANGELOG.md is not staged.
+
+Diagnostic checklist:
+□ Did Step 1.2 execute the skill?
+□ Did Step 1.3 stage the result?
+□ Is [skip changelog] directive present?
+
+Resolution:
+1. Run: /skill changelog-generator --since-last-release
+2. Run: git add CHANGELOG.md
+3. Verify: git status --porcelain CHANGELOG.md
+4. Expected: "M CHANGELOG.md" appears
+5. Continue to Step 2
+
+If skipping changelog, ensure [skip changelog] is in commit message or PR title.
+```
+
+**Why This Check Exists:**
+
+PRs #109, #114, #118, #119, #120 merged without changelog updates because Step 0 Enforcement Gate passed, Step 1 documented the changelog generation, but nothing verified the changelog was actually staged before squash.
+
+This checkpoint ensures:
+1. Skill invocation (Step 1.2) actually happened
+2. Staging (Step 1.3) actually happened
+3. Changelog changes ARE in the squash commit
 
 #### Context Isolation Benefits
 

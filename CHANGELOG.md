@@ -9,11 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Changelog Generator Task Files** - Created executable task files (since-last-release, date-range, backfill) for the changelog-generator skill. Skills now have proper procedural workflows, not just documentation.
+- **Skill Creator Import** - Imported skill-creator from awesome-opencode-skills. Create new skills with templates and guided workflows.
 - **Changelog Generator Skill Integration** - Automated CHANGELOG.md updates during PR creation workflow. The skill runs as a sub-task to prevent context pollution from its git commit analysis and formatting operations.
 
 ### Changed
 
+- **PR Workflow Enforcement Gates** - Added enforcement checkpoints that PR creation requires explicit "create a PR" instruction (not just "approved"). Skills must be executed, not just loaded—procedural steps are mandatory.
+- **Cleanup Task Output** - Streamlined to one-line confirmation. Removed verbose executive summary and PR URL re-reporting after merge.
 - **PR Workflow Enhanced** - Added `/skill changelog-generator` invocation to PR creation workflow. Changelog changes are now automatically included in the same commit as code changes via squash.
+
+### Fixed
+
+- **Changelog Verification Gate** - Added Step 1.4 verification checkpoint before squash. Previous PRs could skip from gate check directly to squash without verifying changelog changes were staged.
+- **Changelog Invocation** - Fixed PR workflow that referenced skill but never invoked it. Added mandatory execution language and explicit sub-step numbering.
+- **Approval Gate Silent Halt** - Fixed silent halt when STATUS field missing from sub-issues. Added default behavior (first subtask) and mandatory status reporting to user.
 
 ---
 
