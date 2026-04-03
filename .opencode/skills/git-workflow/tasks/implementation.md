@@ -16,6 +16,22 @@ Handle work-in-progress commits during implementation. Multiple commits during i
 - Implementation authorized for this phase/task
 - Working tree clean (or stashed)
 
+## Entry Is AUTOMATIC After Pre-Work
+
+**⚠️ CRITICAL: Implementation starts AUTOMATICALLY after pre-work.**
+
+When pre-work reports "Ready for implementation on branch: X", the agent immediately continues to implementation — NO user input is needed, NO waiting for permission, NO halt point between pre-work and implementation.
+
+**Correct workflow:**
+```
+pre-work completes → Report "Ready for implementation" → IMMEDIATELY start implementation
+```
+
+**Wrong workflow (CRITICAL VIOLATION):**
+```
+pre-work completes → Report "Ready for implementation" → HALT → Wait for user to say "continue"
+```
+
 ## Exit Criteria
 
 - All implementation work complete for authorized phase/task
