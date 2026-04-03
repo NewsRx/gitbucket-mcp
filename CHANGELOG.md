@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GitBucket 4.46.0 OpenAPI Specification** - OpenAPI spec for GitBucket 4.46.0 with no API changes from 4.45.0. AI agents can now reference v4.46.0 spec for GitBucket API operations.
 - **Skill Step Numbering Fix** - Renumbered all skill task steps to start at 1 instead of 0. Steps now use natural human numbering (1, 2, 3) instead of programmer zero-indexing.
 - **Changelog Generator Task Files** - Created executable task files (since-last-release, date-range, backfill) for the changelog-generator skill. Skills now have proper procedural workflows, not just documentation.
 - **Skill Creator Import** - Imported skill-creator from awesome-opencode-skills. Create new skills with templates and guided workflows.
