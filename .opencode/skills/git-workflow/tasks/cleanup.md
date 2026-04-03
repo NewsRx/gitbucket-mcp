@@ -25,7 +25,7 @@ Delete merged branches after PR merge, clean stale references, and verify reposi
 
 ## Procedure
 
-### Step 0: Succinct Confirmation Template (CRITICAL)
+### Step 1: Succinct Confirmation Template (CRITICAL)
 
 **The `cleanup` task is THE END of the PR workflow. It MUST produce a one-line succinct confirmation and then HALT.**
 
@@ -37,7 +37,7 @@ PR #<number> merged. Branch `<branch-name>` deleted. Cleanup complete.
 
 **⚠️ CRITICAL: Do NOT re-report PR details or issue lists. The PR was already reported at creation time.**
 
-### Step 1: Verify PR Merge (CRITICAL - NO EXCEPTIONS)
+### Step 2: Verify PR Merge (CRITICAL - NO EXCEPTIONS)
 
 **🚫 CRITICAL VIOLATION: Closing issues without PR merge verification is a CRITICAL GUIDELINE VIOLATION.**
 
@@ -58,19 +58,15 @@ proceed_to_close_issues()
 ```
 
 **Why API verification is mandatory:**
-- `git pull` shows local fast-forward success
-- Does NOT verify PR was merged (could be closed/rejected)
-- GitHub API `merged_at` field is the ONLY reliable merge indicator
-- Closing issues without merged PR loses tracking and audit trail
 
-### Step 2: Switch to Main
+### Step 3: Switch to Main
 
 ```bash
 git checkout main
 git pull origin main
 ```
 
-### Step 3: Delete Current Merged Branch
+### Step 4: Delete Current Merged Branch
 
 ```bash
 # Delete local branch
@@ -83,7 +79,7 @@ git push origin --delete <merged-branch-name> 2>/dev/null || echo "Remote alread
 git fetch --prune
 ```
 
-### Step 4: Clean Other Merged Branches
+### Step 5: Clean Other Merged Branches
 
 **Find merged branches:**
 ```bash
@@ -95,7 +91,7 @@ git branch --merged main
 git branch -d <branch>
 ```
 
-### Step 5: Verify Clean State
+### Step 6: Verify Clean State
 
 ```bash
 git status --porcelain  # Must be empty

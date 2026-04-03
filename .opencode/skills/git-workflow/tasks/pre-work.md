@@ -18,7 +18,7 @@ Verify branch state, preserve changes, create feature branch BEFORE any implemen
 
 ## Procedure
 
-### Step 0: Verify Authorization (MANDATORY FIRST)
+### Step 1: Verify Authorization (MANDATORY FIRST)
 
 **🚫 CRITICAL: This check MUST happen BEFORE any git operations.**
 
@@ -111,7 +111,7 @@ No 'approved' or 'go' comment found on issue #N.
 To authorize: Say 'approved' or 'go' in a comment.
 ```
 
-### Step 1: Check Current Git State
+### Step 2: Check Current Git State
 
 ```bash
 git branch --show-current
@@ -120,7 +120,7 @@ git status
 
 If on `main` → stash changes then create feature branch.
 
-### Step 2: Stash ALL Pending Changes (MANDATORY)
+### Step 3: Stash ALL Pending Changes (MANDATORY)
 
 **ALWAYS stash before ANY branch operation. No exceptions.**
 
@@ -136,7 +136,7 @@ git stash push -u -m "WIP: before <branch-name>"
 - Untracked files
 - Staged changes
 
-### Step 3: Verify Stash Succeeded
+### Step 4: Verify Stash Succeeded
 
 ```bash
 git stash list  # VERIFY stash created
@@ -152,14 +152,14 @@ git status      # VERIFY clean working tree
 
 **If EITHER check fails → STOP. Report failure. Let user resolve.**
 
-### Step 4: Create Feature Branch
+### Step 5: Create Feature Branch
 
 ```bash
 git checkout main && git pull origin main
 git checkout -b spec/<short-name>  # or feature/<description>
 ```
 
-### Step 5: Report Ready
+### Step 6: Report Ready
 
 Report: "Ready for implementation on branch: <branch-name>"
 

@@ -30,7 +30,7 @@ The sequence is:
 
 ## Procedure
 
-### Step 0: Determine Implementation Outcome
+### Step 1: Determine Implementation Outcome
 
 **Check if any changes were made:**
 
@@ -43,7 +43,7 @@ git status --porcelain
 - This means implementation was already complete or no changes needed
 
 **If NOT EMPTY (file changes exist):**
-- Continue to Step 1 (Push Feature Branch)
+- Continue to Step 2 (Push Feature Branch)
 
 ---
 
@@ -65,7 +65,7 @@ git status --porcelain
 
 ---
 
-### Step 1: Push Feature Branch
+### Step 2: Push Feature Branch
 
 ```bash
 git push -u origin <branch-name>
@@ -73,7 +73,7 @@ git push -u origin <branch-name>
 
 This pushes the branch WITHOUT creating a PR.
 
-### Step 2: Generate Compare URL
+### Step 3: Generate Compare URL
 
 Using session values (GIT_OWNER, GIT_REPO):
 
@@ -81,7 +81,7 @@ Using session values (GIT_OWNER, GIT_REPO):
 https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
 ```
 
-### Step 3: Report Completion
+### Step 4: Report Completion
 
 Format for issue (NO URL):
 
@@ -109,7 +109,7 @@ Post to chat (exec summary + URL):
 Compare URL: https://github.com/<owner>/<repo>/compare/main...<branch-name>
 ```
 
-### Step 4: HALT
+### Step 5: HALT
 
 **DO NOT:**
 - Create PR (requires explicit "create a PR")
