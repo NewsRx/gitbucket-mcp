@@ -128,13 +128,42 @@ Based on the investigation, the feature is ready for implementation. The API end
 
 **🚨 CRITICAL: ALWAYS APPEND. NEVER REPLACE.**
 
-| Action | Operation | Byline |
-|--------|-----------|--------|
-| Create issue | Append | `🤖 ✨ Created by <AgentName> (<ModelID>)` |
-| Update content | Append | `🤖 📝 Updated by <AgentName> (<ModelID>)` |
-| Complete issue | Append | `🤖 ✅ Completed by <AgentName> (<ModelID>)` |
-| Reject issue | Append | `🤖 ❌ Rejected by <AgentName> (<ModelID>)` |
-| Supersede issue | Append | `🤖 🔄 Superseded by <AgentName> (<ModelID>)` |
+| Action | Operation | Byline | When |
+|--------|-----------|--------|------|
+| Create issue | Append to body | `🤖 ✨ Created by <AgentName> (<ModelID>)` | **BEFORE** `github_issue_write` call |
+| Update content | Append to body | `🤖 📝 Updated by <AgentName> (<ModelID>)` | After `github_issue_write` call |
+| Complete issue | Append to body | `🤖 ✅ Completed by <AgentName> (<ModelID>)` | After `github_issue_write` call |
+| Reject issue | Append to body | `🤖 ❌ Rejected by <AgentName> (<ModelID>)` | After `github_issue_write` call |
+| Supersede issue | Append to body | `🤖 🔄 Superseded by <AgentName> (<ModelID>)` | After `github_issue_write` call |
+
+**🚨 CRITICAL: Creation byline is appended to body BEFORE creating the issue.**
+
+**Wrong Approach:**
+```python
+# ❌ WRONG: Create issue first, then add byline as comment
+issue = github_issue_write(method="create", body=body, ...)
+github_add_issue_comment(..., body="🤖 ✨ Created by ...")
+```
+
+**Correct Approach:**
+```python
+# ✅ CORRECT: Append byline to body before creating
+body_with_byline = f"""{body}
+
+---
+
+> **Approval Tracking**: Approvals tracked via comments.
+
+🤖 ✨ Created by <AgentName> (<ModelID>)
+"""
+issue = github_issue_write(method="create", body=body_with_byline, ...)
+# NO separate comment needed
+```
+
+**Why this matters:**
+- Byline appears in initial issue body, not as a separate comment
+- Lifecycle visibility is preserved from the start
+- No separate comment pollutes the issue history
 
 **Rule:** Byline = WHO did WHAT. Details belong in comment body, not byline. No extra context.
 
