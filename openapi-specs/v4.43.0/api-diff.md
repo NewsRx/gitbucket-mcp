@@ -1,0 +1,313 @@
+# GitBucket API Differences - Version 4.43.0
+
+**Release Date:** 2025-06-29  
+**Release Notes:** https://github.com/gitbucket/gitbucket/releases/tag/4.43.0  
+**Compare View:** https://github.com/gitbucket/gitbucket/compare/4.42.1...4.43.0
+
+---
+
+## Overview
+
+This document describes API changes between GitBucket 4.42.1 and 4.43.0.
+
+**Analysis Method:** Source code comparison between tags 4.42.1 and 4.43.0.
+
+**⚠️ BREAKING CHANGE:** H2 database upgraded from 1.x to 2.x. Requires manual data migration for H2 users.
+
+---
+
+## 1. New Endpoints
+
+**None** - No new API endpoints were added in 4.43.0.
+
+---
+
+## 2. Modified Endpoints
+
+**None** - No API endpoints were modified in 4.43.0.
+
+The only changes in API controller files are whitespace formatting:
+- `ApiGitReferenceControllerBase.scala` - formatting only (case alignment)
+- `ApiIssueMilestoneControllerBase.scala` - formatting only (case alignment)
+
+**Source Code Diffs:**
+
+`ApiGitReferenceControllerBase.scala` (formatting only):
+
+```diff
+-      case "tags" => repository.tags.map(ApiRef.fromTag(name, _))
++      case "tags"                     => repository.tags.map(ApiRef.fromTag(name, _))
+```
+
+`ApiIssueMilestoneControllerBase.scala` (formatting only):
+
+```diff
+-      case "all" => JsonFormat(apiMilestones)
++      case "all"             => JsonFormat(apiMilestones)
+```
+
+**Impact:**
+- NO changes to API behavior
+- NO changes to request/response schemas
+- NO changes to endpoint functionality
+
+---
+
+## 3. Schema Changes
+
+**None** - No changes to request/response schemas in 4.43.0.
+
+---
+
+## 4. Internal Changes (No API Impact)
+
+### 4.1 H2 Database Upgrade (Breaking Change for H2 Users)
+
+- **Change:** Upgraded H2 database from 1.x to 2.x
+- **Impact:** Backend database engine only - NO changes to API surface
+- **Breaking:** H2 users must manually migrate database
+
+**Migration Required for H2 Users:**
+
+Users with H2 databases (:warning: **BREAKING**) must perform manual migration:
+
+```bash
+# Export database using the current version of H2
+curl -O https://repo1.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar
+java -cp h2-1.4.199.jar org.h2.tools.Script -url "jdbc:h2:~/.gitbucket/data" -user sa -password sa -script dump.sql
+
+# Recreate database using the new version of H2
+curl -O https://repo1.maven.org/maven2/com/h2database/h2/2.3.232/h2-2.3.232.jar
+java -cp h2-2.3.232.jar org.h2.tools.RunScript -url "jdbc:h2:~/.gitbucket/data" -user sa -password sa -script dump.sql
+```
+
+**Configuration Change:**
+
+If `~/.gitbucket/database.conf` has `MVCC=true` in the URL, it must be removed:
+
+```
+db {
+  url = "jdbc:h2:${DatabaseHome};MVCC=true" // => "jdbc:h2:${DatabaseHome}"
+  ...
+}
+```
+
+**PostgreSQL and MySQL Users:**
+- **NOT affected** by this change
+- No migration required
+
+### 4.2 Service Layer Changes (No API Impact)
+
+Files changed in service layer:
+- `AccountService.scala` - formatting only
+- `JGitUtil.scala` - formatting only
+- Other service files - internal implementation only
+
+**Impact:**
+- NO changes to API behavior
+- NO changes to externally-visible interfaces
+
+---
+
+## 5. Breaking Changes
+
+### 5.1 H2 Database Migration (Backend Only)
+
+**For H2 Database Users:**
+
+**Breaking Change:** H2 1.x → 2.x migration is REQUIRED before upgrading.
+
+**External API Clients:**
+- NO changes required
+- All API endpoints remain compatible
+- No schema migrations needed
+
+**Detailed Migration Guide:**
+
+See: https://www.h2database.com/html/migration-to-v2.html
+
+**Summary:**
+1. Export database with H2 1.x
+2. Delete old database files
+3. Import database with H2 2.x
+4. Update connection URL (remove `MVCC=true` if present)
+
+---
+
+## 6. Deprecated Endpoints
+
+**None** - No API endpoints were deprecated in 4.43.0.
+
+---
+
+## 7. Removed Endpoints
+
+**None** - No API endpoints were removed in 4.43.0.
+
+---
+
+## 8. Authentication Changes
+
+**None** - No changes to authentication mechanisms in 4.43.0.
+
+---
+
+## 9. Total Endpoints
+
+| Version | Endpoint Count |
+|---------|----------------|
+| 4.42.1 | 93 |
+| 4.43.0 | 93 |
+
+**No changes to the total number of API endpoints.**
+
+---
+
+## 10. Source Code Differences
+
+### Files Changed (API-related)
+
+| File | Change Type | Impact |
+|------|-------------|--------|
+| `ApiGitReferenceControllerBase.scala` | Whitespace formatting only | NO API impact |
+| `ApiIssueMilestoneControllerBase.scala` | Whitespace formatting only | NO API impact |
+
+### Files Changed (Backend only)
+
+| File | Change Type | Impact |
+|------|-------------|--------|
+| `build.sbt` | Dependency upgrade (H2 1.x → 2.x) | Backend: database engine only |
+| `DatabaseConfig.scala` | Configuration update | Backend: H2 compatibility |
+| `Directory.scala` | Internal utility | Backend: no API changes |
+| `AccountService.scala` | Whitespace formatting | Backend: no API changes |
+| `JGitUtil.scala` | Whitespace formatting | Backend: no API changes |
+| Other service/controller files | Internal implementation | Backend: no API changes |
+
+---
+
+## 11. Verification Method
+
+This comparison was generated by:
+
+1. ✅ **Clone both version tags** (NOT relying on CHANGELOG)
+   ```bash
+   git clone --depth 1 --branch 4.42.1 https://github.com/gitbucket/gitbucket.git
+   git clone --depth 1 --branch 4.43.0 https://github.com/gitbucket/gitbucket.git
+   ```
+
+2. ✅ **Diff API directories:**
+   ```bash
+   diff -rq gitbucket-4.42.1/src/main/scala/gitbucket/core/controller/api/ \
+            gitbucket-4.43.0/src/main/scala/gitbucket/core/controller/api/
+   ```
+
+3. ✅ **Count API routes:**
+   ```bash
+   grep -E "(get|post|put|patch|delete)\\(\"/api/v3" \
+            gitbucket-4.*/src/main/scala/gitbucket/core/controller/api/*.scala | wc -l
+   # Result: 93 routes in both versions
+   ```
+
+4. ✅ **Analyze each diff manually** to verify NO functional changes
+
+**Source:**
+- Release Notes: "Upgrade H2 database from 1.x to 2.x"
+- Source diff: Shows NO API endpoint changes, only whitespace formatting and backend database upgrade
+
+---
+
+## 12. Recommendations for API Consumers
+
+### External API Clients
+
+1. **NO changes required** - All 4.42.1 API clients will work on 4.43.0
+2. **NO schema migrations needed** - All existing response formats remain compatible
+3. **Consider backend upgrade path** - If using H2 database, plan migration
+
+### GitBucket Plugin Developers
+
+1. **NO API changes** - Plugins using public API will continue to work
+2. **H2 migration does NOT affect plugins** - Database migration is transparent to plugins
+3. **No recompilation required** - Binary compatibility maintained
+
+---
+
+## 13. Migration Guide
+
+### External API Clients: No Migration Required
+
+All REST API endpoints remain compatible. No client changes needed.
+
+### GitBucket Administrators (H2 Users Only)
+
+**BEFORE upgrading to 4.43.0:**
+
+1. **Backup your database:**
+   ```bash
+   cp -r ~/.gitbucket/data ~/.gitbucket/data.backup
+   ```
+
+2. **Export with H2 1.4.199:**
+   ```bash
+   curl -O https://repo1.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar
+   java -cp h2-1.4.199.jar org.h2.tools.Script \
+       -url "jdbc:h2:~/.gitbucket/data" \
+       -user sa -password sa \
+       -script dump.sql
+   ```
+
+3. **Remove old database files:**
+   ```bash
+   rm -rf ~/.gitbucket/data*
+   ```
+
+4. **Import with H2 2.3.232:**
+   ```bash
+   curl -O https://repo1.maven.org/maven2/com/h2database/h2/2.3.232/h2-2.3.232.jar
+   java -cp h2-2.3.232.jar org.h2.tools.RunScript \
+       -url "jdbc:h2:~/.gitbucket/data" \
+       -user sa -password sa \
+       -script dump.sql
+   ```
+
+5. **Update database.conf (if needed):**
+   ```bash
+   # Remove ;MVCC=true from URL if present
+   # Before: url = "jdbc:h2:${DatabaseHome};MVCC=true"
+   # After:  url = "jdbc:h2:${DatabaseHome}"
+   ```
+
+### PostgreSQL and MySQL Users
+
+**NO migration required.** Upgrade directly to 4.43.0.
+
+---
+
+## 14. Lessons Learned
+
+**Release notes were accurate.**
+
+The release notes correctly identified the only significant change:
+- H2 database upgrade from 1.x to 2.x
+
+**Source verification confirmed:**
+- NO undocumented API changes
+- NO hidden schema modifications
+- NO endpoint additions or removals
+- ONLY whitespace formatting in API controllers
+
+**This release is API-stable.**
+
+---
+
+## 15. Related Documentation
+
+| Document | Purpose |
+|----------|---------|
+| `openapi.json` | Full OpenAPI 3.0.3 specification for v4.43.0 |
+| `release-notes.md` | Official release notes from GitBucket |
+| This file (`api-diff.md`) | API differences from v4.42.1 |
+
+---
+
+*API baseline comparison document for GitBucket 4.43.0 - Generated from SOURCE CODE ANALYSIS (not release notes trust)*
