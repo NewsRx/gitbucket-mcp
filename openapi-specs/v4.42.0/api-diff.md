@@ -10,7 +10,7 @@
 
 This document describes API changes between GitBucket 4.41.0 and 4.42.0.
 
-**Analysis Method:** Direct comparison of CHANGELOG and release notes for v4.42.0.
+**Analysis Method:** Direct source code comparison between GitBucket tags 4.41.0 and 4.42.0. **Do NOT trust release notes** - this analysis is based on actual source diffs, not CHANGELOG claims.
 
 ---
 
