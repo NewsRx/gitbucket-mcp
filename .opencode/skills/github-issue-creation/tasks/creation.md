@@ -19,7 +19,7 @@ Create GitHub Issue with proper title format, labels, and byline after validatio
 
 - Issue created in GitHub
 - `needs-approval` label applied
-- Creation byline added to initial comment
+- Creation byline appended to issue body (NOT a separate comment)
 - Issue number available for sub-issue linking
 
 ## Procedure
@@ -33,34 +33,23 @@ Create GitHub Issue with proper title format, labels, and byline after validatio
 | Enhancement | `[SPEC-ENHANCEMENT] <Enhancement>` | `[SPEC-ENHANCEMENT] Add Rate Limiting` |
 | Task | `[Task: #<parent>] <Task Description>` | `[Task: #100] Create user tables` |
 
-### Step 2: Create Issue
+### Step 2: Append Byline to Body (CRITICAL)
 
+**🚨 CRITICAL: Append byline to body BEFORE creating issue.**
+
+The byline MUST be appended to the issue body BEFORE calling `github_issue_write`, NOT as a separate comment after creation.
+
+**Wrong Approach (VIOLATION):**
 ```python
-github_issue_write(
-    method="create",
-    owner=owner,
-    repo=repo,
-    title=title,  # Format: [SPEC] <Description>
-    body=body,    # Full spec content
-    labels=["needs-approval"]
-)
+# ❌ WRONG: Create issue first, then add byline as comment
+issue = github_issue_write(method="create", body=body, ...)
+github_add_issue_comment(..., body="🤖 ✨ Created by ...")  # BYLINE AS COMMENT
 ```
 
-**Response includes:**
-- `number`: Issue number (database ID)
-- `id`: Database ID for sub-issue linking
-- `html_url`: Issue URL
-
-### Step 3: Add Creation Byline
-
-**Post initial comment with byline:**
-
+**Correct Approach:**
 ```python
-github_add_issue_comment(
-    owner=owner,
-    repo=repo,
-    issue_number=issue_number,
-    body=f"""[Issue body content]
+# ✅ CORRECT: Append byline to body, then create issue
+body_with_byline = f"""{body}
 
 ---
 
@@ -68,6 +57,14 @@ github_add_issue_comment(
 
 🤖 ✨ Created by <AgentName> (<ModelID>)
 """
+
+issue = github_issue_write(
+    method="create",
+    owner=owner,
+    repo=repo,
+    title=title,  # Format: [SPEC] <Description>
+    body=body_with_byline,  # Body WITH byline already appended
+    labels=["needs-approval"]
 )
 ```
 
@@ -75,6 +72,18 @@ github_add_issue_comment(
 - **Plain text emoji** (not inside italic/bold)
 - Agent dynamically detects its own name and model ID
 - **NEVER copy example values** — detect at runtime
+- **Approval tracking separator** MUST be included before byline
+
+### Step 3: Report Issue Created
+
+Report: "Created issue #<number>. Next step: Invoke auditors before approval."
+
+**Response includes:**
+- `number`: Issue number (database ID)
+- `id`: Database ID for sub-issue linking
+- `html_url`: Issue URL
+
+**IMPORTANT: NO separate byline comment needed - byline is in body.**
 
 ### Step 4: Report Issue Created
 
@@ -101,7 +110,8 @@ Before proceeding, verify ALL:
 - Pre-creation validation passed
 - Title follows proper format
 - `needs-approval` label applied
-- Creation byline added
+- Creation byline appended to body BEFORE issue creation
+- Approval tracking separator included
 
 **If ANY check fails → HALT and report.**
 

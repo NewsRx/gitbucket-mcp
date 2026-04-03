@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Issue Creation Byline Workflow** - Fixed byline placement in issue body. Byline now appended to body before creating issue, not added as separate comment after. This ensures lifecycle visibility from issue creation.
 - **Step Numbering in Skills** - All task files now use Step 1, Step 2, etc. instead of Step 0. Human-readable procedures start at 1.
 - **Changelog Verification Gate** - Added Step 2.4 verification checkpoint before squash. Previous PRs could skip from gate check directly to squash without verifying changelog changes were staged.
 - **Changelog Invocation** - Fixed PR workflow that referenced skill but never invoked it. Added mandatory execution language and explicit sub-step numbering.
