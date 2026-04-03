@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Skill-Only Workflow Enforcement** - Agents must route ALL major operations through skills. Direct git commands, issue creation via `github_issue_write`, and PR creation bypass are now critical violations preventing workflow circumvention.
+- **OpenAPI Spec Verification v4.42.0** - Corrected API diff documentation with source code comparison. Discovered BREAKING CHANGE in tags endpoint (string array → ApiTag objects) that was missed in initial analysis. Verification section now documents actual methodology instead of trusting CHANGELOG.
 - **PR Workflow Enforcement Gates** - Added enforcement checkpoints that PR creation requires explicit "create a PR" instruction (not just "approved"). Skills must be executed, not just loaded—procedural steps are mandatory.
 - **Cleanup Task Output** - Streamlined to one-line confirmation. Removed verbose executive summary and PR URL re-reporting after merge.
 - **PR Workflow Enhanced** - Added `/skill changelog-generator` invocation to PR creation workflow. Changelog changes are now automatically included in the same commit as code changes via squash.
