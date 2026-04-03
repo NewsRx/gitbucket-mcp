@@ -5,6 +5,96 @@
 
 This file provides critical rules that must never be violated.
 
+## Critical Violation: Wrong Chat Output Format — ZERO TOLERANCE
+
+**⚠️ Posting URL before executive summary in chat is a CRITICAL GUIDELINE VIOLATION with ZERO TOLERANCE.**
+
+### 🚫 FORBIDDEN (CRITICAL VIOLATION - ZERO TOLERANCE)
+
+```
+Compare URL: https://github.com/owner/repo/compare/main...branch
+
+**Summary:** Changes to skill files...
+**Outcome:** Added enforcement rules
+```
+
+**This is WRONG because:**
+- URL appears FIRST without context
+- Developer clicks URL without understanding what changed
+- No business impact or stakeholder value communicated
+- Violates MUST-FIRST requirement
+
+### ✅ REQUIRED (ENFORCEMENT GATE)
+
+**MUST pass ALL checks before posting:**
+
+```
+□ MUST-FIRST: Summary appears BEFORE URL
+  - NEVER start with "Compare URL:" or "PR URL:" or URL
+  - MUST start with "**Summary:**"
+  
+□ MUST-FIRST: Format follows template EXACTLY
+  - Summary section with 1-2 sentences of impact
+  - Outcome line describing stakeholder value
+  - URL LAST (never first)
+  
+□ MUST-FIRST: No URL in GitHub Issues
+  - Chat output includes URL
+  - Issue completion comment has NO URL
+```
+
+### Enforcement: STOP. Reformat. Report. NO EXCEPTIONS.
+
+**If URL appears before summary:**
+
+1. **STOP immediately** — do NOT post the message
+2. **Reformat** — following the MUST template
+3. **Verify** — summary appears before URL
+4. **Post corrected message**
+5. **HALT after posting**
+
+**Violation Detection:**
+
+| Wrong Format | Why It's Wrong |
+|--------------|-----------------|
+| `Compare URL: https://...` | URL first, no context |
+| `PR URL: https://...` | URL first, no context |
+| `https://github.com/...` then summary | URL before context |
+| `**Summary:**` appears after URL | Wrong order |
+
+### Correct Format Template
+
+```
+**Summary:**
+
+Updated git-workflow skill to enforce automatic invocation...
+
+**Outcome:** Developers will now see compare URL after every implementation.
+
+Compare URL: https://github.com/owner/repo/compare/main...branch
+```
+
+### Why This Matters
+
+- Developer needs context BEFORE clicking URL
+- Executive summary explains business impact
+- Outcome states what changed for stakeholders
+- URL appears LAST as actionable link
+
+### Consequence: Immediate Halt Required
+
+**DO NOT proceed with incorrect format.**
+
+This violation has the highest enforcement priority:
+- STOP immediately on detection
+- Reformat to correct order
+- Report the violation
+- NO exceptions, NO mitigating circumstances
+
+**See `git-workflow` skill → `pr-creation` task → Step 7 for MUST-FIRST enforcement gate.**
+
+---
+
 ## Critical Violation: Skipping Git Pre-Check Before ANY Work
 
 **⚠️ Working on files without checking git state is a CRITICAL GUIDELINE VIOLATION.**
@@ -147,41 +237,6 @@ After EVERY implementation:
 
 ---
 
-## Critical Violation: Wrong Chat Output Format
-
-**⚠️ Posting URL before executive summary in chat is a CRITICAL GUIDELINE VIOLATION.**
-
-### 🚫 FORBIDDEN
-
-```
-Compare URL: https://github.com/owner/repo/compare/main...branch
-
-**Summary:** Changes to skill files...
-**Outcome:** Added enforcement rules
-```
-
-### ✅ REQUIRED
-
-```
-**Summary:**
-
-Updated git-workflow skill to enforce automatic invocation...
-
-**Outcome:** Developers will now see compare URL after every implementation.
-
-Compare URL: https://github.com/owner/repo/compare/main...branch
-```
-
-### Why This Matters
-
-- Developer needs context BEFORE clicking URL
-- Executive summary explains business impact
-- Outcome states what changed for stakeholders
-- URL appears LAST as actionable link
-
-**See `git-workflow` skill → "Chat Output Format (CRITICAL)" section.**
-
----
 
 ## Critical Violation: Uncommitted/Unpushed Changes After Implementation
 
@@ -1096,41 +1151,6 @@ After EVERY implementation:
 
 ---
 
-## Critical Violation: Wrong Chat Output Format
-
-**⚠️ Posting URL before executive summary in chat is a CRITICAL GUIDELINE VIOLATION.**
-
-### 🚫 FORBIDDEN
-
-```
-Compare URL: https://github.com/owner/repo/compare/main...branch
-
-**Summary:** Changes to skill files...
-**Outcome:** Added enforcement rules
-```
-
-### ✅ REQUIRED
-
-```
-**Summary:**
-
-Updated git-workflow skill to enforce automatic invocation...
-
-**Outcome:** Developers will now see compare URL after every implementation.
-
-Compare URL: https://github.com/owner/repo/compare/main...branch
-```
-
-### Why This Matters
-
-- Developer needs context BEFORE clicking URL
-- Executive summary explains business impact
-- Outcome states what changed for stakeholders
-- URL appears LAST as actionable link
-
-**See `git-workflow` skill → "Chat Output Format (CRITICAL)" section.**
-
----
 
 ## Critical Violation: Uncommitted/Unpushed Changes After Implementation
 
