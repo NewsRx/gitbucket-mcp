@@ -533,9 +533,66 @@ Fixes #<child2>
 
 ### Step 7: Report PR URL and HALT
 
-### ⚠️ CRITICAL: PR URL Reporting is MANDATORY
+### ⚠️ CRITICAL: PR URL Reporting is MANDATORY (MUST-FIRST)
 
-**You MUST report exec summary + PR URL in chat:**
+**🚫 CRITICAL: This is an ENFORCEMENT GATE, not just documentation.**
+
+**If ANY check fails → STOP and report. DO NOT proceed.**
+
+#### Enforcement Gate (MUST PASS ALL)
+
+**Before reporting completion, verify ALL conditions:**
+
+```
+□ MUST-FIRST: Summary appears BEFORE URL
+  - NEVER start with "Compare URL:" or "PR URL:" or URL
+  - MUST start with "**Summary:**"
+  
+□ MUST-FIRST: Format follows template EXACTLY
+  - Summary section with 1-2 sentences of impact
+  - Outcome line describing stakeholder value
+  - URL LAST (never first)
+  
+□ MUST-FIRST: No URL in GitHub Issues
+  - Chat output includes URL
+  - Issue completion comment has NO URL
+```
+
+#### Violation Detection (CRITICAL)
+
+**If URL appears before summary → CRITICAL VIOLATION**
+
+| Wrong Format | Why It's Wrong |
+|--------------|-----------------|
+| `Compare URL: https://...` | URL first, no context |
+| `PR URL: https://...` | URL first, no context |
+| `https://github.com/...` then summary | URL before context |
+| `**Summary:**` appears after URL | Wrong order |
+
+#### Enforcement Action (ZERO TOLERANCE)
+
+**If violation detected:**
+
+```
+⛔ CRITICAL VIOLATION: URL Before Summary
+
+STOP. Reformat. Report. No exceptions.
+
+Violation: URL appeared before executive summary.
+Impact: Developer clicks URL without understanding what changed.
+Required: Executive summary FIRST, URL LAST.
+
+Fix:
+1. STOP immediately (do not post)
+2. Reformat message following MUST template
+3. Verify summary appears before URL
+4. Post corrected message
+5. HALT after posting
+
+DO NOT PROCEED with incorrect format.
+```
+
+#### Correct Format Template (MUST FOLLOW EXACTLY)
 
 ```
 **Summary:**
@@ -549,10 +606,16 @@ Fixes #<child2>
 Wait for human to merge.
 ```
 
-**Format Requirements:**
-- Executive summary FIRST (provides context)
-- PR URL LAST (clickable link)
-- MUST include "Wait for human to merge"
+#### Format Rules (MUST MARKERS)
+
+| Element | MUST Requirement |
+|---------|------------------|
+| Executive summary | **MUST appear FIRST** - no exceptions |
+| Summary content | **MUST** describe impact and stakeholder value (1-2 sentences) |
+| Outcome line | **MUST** appear after summary |
+| PR URL | **MUST** appear LAST (never first) |
+| URL in chat ONLY | **MUST NEVER** post URL to GitHub Issues |
+| Wait message | **MUST** include "Wait for human to merge" |
 
 ### What If PR Creation Fails?
 
