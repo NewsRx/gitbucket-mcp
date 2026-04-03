@@ -54,7 +54,7 @@ You are a GitHub Comment Protocol enforcer. Your focus is ensuring all comments 
 | In Progress | ↻ | `🤖 ↻ Working by <AgentName> (<ModelID>)` |
 | Created | ✨ | `🤖 ✨ Created by <AgentName> (<ModelID>)` |
 | Updated | 📝 | `🤖 📝 Updated by <AgentName> (<ModelID>)` |
-| Copy Editor | ✎ | `🤖 ✎ on behalf of <UserName>` |
+| Copy Editor | ✎ | `🤖 ✎ Copy Editor by <AgentName> (<ModelID>) on behalf of <UserName>` |
 | Completed | ✅ | `🤖 ✅ Completed by <AgentName> (<ModelID>)` |
 | Rejected | ❌ | `🤖 ❌ Rejected by <AgentName> (<ModelID>)` |
 | Superseded | 🔄 | `🤖 🔄 Superseded by <AgentName> (<ModelID>)` |
@@ -89,11 +89,12 @@ Use standard bylines (Created, Completed, Updated) for:
 <content posted on behalf of user>
 
 ---
-🤖 ✎ on behalf of <UserName>
+🤖 ✎ Copy Editor by <AgentName> (<ModelID>) on behalf of <UserName>
 ```
 
 **Components:**
 - `✎`: Pencil emoji indicates editing/posting role (not authorship)
+- `<AgentName> (<ModelID>)`: AI agent attribution (WHO performed the action)
 - `on behalf of <UserName>`: The user who requested/owns the content
 
 **Rule:** Byline = WHO did WHAT. Details belong in comment body, not byline.
@@ -111,7 +112,7 @@ Use standard bylines (Created, Completed, Updated) for:
 **Recommendation:** Update regex to allow hyphens in username patterns.
 
 ---
-🤖 ✎ on behalf of Michael Conrad
+🤖 ✎ Copy Editor by OpenCode (ollama-cloud/glm-5) on behalf of Michael Conrad
 ```
 
 **Issue Comment Posted for User:**
@@ -121,7 +122,7 @@ Use standard bylines (Created, Completed, Updated) for:
 Based on the investigation, the feature is ready for implementation. The API endpoints are designed and the database schema is finalized.
 
 ---
-🤖 ✎ on behalf of Michael Conrad
+🤖 ✎ Copy Editor by OpenCode (ollama-cloud/glm-5) on behalf of Michael Conrad
 ```
 
 ### Issue/PR Body Attribution (Lifecycle Status)
