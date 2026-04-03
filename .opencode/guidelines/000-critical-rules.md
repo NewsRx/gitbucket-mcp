@@ -694,6 +694,48 @@ This check is REQUIRED in these workflows:
 
 ---
 
+---
+
+## Critical Violation: Skill-Only Workflow Bypass — Multi-task Specs
+
+**⚠️ Implementing a multi-task spec without sub-issues is a CRITICAL GUIDELINE VIOLATION.**
+
+### 🚫 ABSOLUTE PROHIBITION
+- **NEVER implement a multi-task spec without verified sub-issue structure**
+- **NEVER proceed when `get_sub_issues` returns empty array for multi-task specs**
+- **NEVER assume markdown checkboxes = task tracking**
+
+### ✅ MANDATORY WORKFLOW
+
+**Before implementing ANY multi-task spec:**
+
+```
+1. Call github_issue_read(method="get_sub_issues", issue_number=N)
+2. If empty AND multi-task:
+   a. AUTO-CREATE sub-issues at PHASE level
+   b. Link each via github_sub_issue_write(method="add")
+   c. Post comment: "Created X sub-issues for phase tracking"
+   d. THEN proceed to implementation
+3. If sub-issues exist:
+   - Verify phase being implemented is among them
+   - Proceed with implementation
+```
+
+### 📋 CHECKLIST
+
+| Action | Required? |
+|--------|-----------|
+| `get_sub_issues` check | ✅ ALWAYS |
+| AUTO-CREATE if empty | ✅ YES (multi-task only) |
+| Verify task linked | ✅ ALWAYS |
+| Single-task exemption | ✅ YES (no sub-issues needed) |
+
+### ⚠️ SINGLE-TASK EXCEPTION
+
+Single-task specs (one implementation task, no decomposition needed) do NOT require sub-issues. All multi-task specs MUST have sub-issues before implementation begins.
+
+---
+
 ## Auditor Skills Enforcement
 
 **⚠️ MANDATORY AUDIT CHAIN: ALL auditor skills must run in order. NO SKIPPING.**

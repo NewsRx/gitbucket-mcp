@@ -81,6 +81,72 @@ After session init, probe MCP availability:
 
 🚫 **PROHIBITED**: Using `read`/`write`/`edit`/`glob`/`grep` on **ANY files** when PyCharm MCP is available.
 
+## Skill-Only Workflow (CRITICAL)
+
+**⚠️ ALL agent operations MUST be handled through skills. There is NO direct action path.**
+
+### 🚫 FORBIDDEN (CRITICAL VIOLATION - ZERO TOLERANCE)
+
+| Operation | Wrong (Direct Bypass) | Correct (Skill-Only) |
+|-----------|----------------------|----------------------|
+| Git operations | Direct `git` commands | `git-workflow` skill |
+| Issue creation | `github_issue_write` calls | `github-issue-creation` skill |
+| PR creation | Direct PR creation | `git-workflow --task pr-creation` |
+| Branch creation | `git checkout -b` | `git-workflow --task pre-work` |
+| Spec auditing | Manual checks | `spec-auditor --issue N` |
+| Guideline auditing | Manual checks | `guideline-auditor` |
+
+### Why This Matters
+
+**The violation that triggered this rule:**
+1. Agent created issues #65, #66, #68 directly using `github_issue_write` tool
+2. Agent pushed branch `spec/upstream-release-template-language-agnostic` without invoking `git-workflow` skill
+3. Agent created PR #67 without invoking `git-workflow` skill
+4. Agent only realized violation when questioned
+
+### Skill Routing Table
+
+| When to Invoke | Skill | Purpose |
+|----------------|-------|---------|
+| **BEFORE creating any GitHub Issue** | `github-issue-creation --task pre-creation` | Validate spec, check conflicts, superseded issues |
+| **User says "approved" or "go"** | `approval-gate --task verify-authorization` | Verify explicit auth, needs-approval label |
+| **User says "approved" or "go"** | `git-workflow --task pre-work` | Stash changes, create branch |
+| **Implementation complete** | `git-workflow --task review-prep` | Push branch, generate compare URL |
+| **User says "create a PR"** | `git-workflow --task pr-creation` | Squash, create PR |
+| **User says "PR merged"** | `git-workflow --task cleanup` | Delete merged branches |
+| **Before approving spec** | `spec-auditor --issue N` | Verify spec quality |
+| **Before approving guideline changes** | `guideline-auditor` | Verify guideline quality |
+
+### Mandatory Skill Workflow
+
+```
+ALL Agent Actions
+    ↓
+Route through appropriate skill
+    ↓
+Skill enforces workflow rules
+    ↓
+Execute with enforcement
+```
+
+**There is NO direct action path for major operations.**
+
+### Exception: Skills Don't Exist Yet
+
+If a new operation type needs to be performed and no skill exists:
+
+1. **HALT** and report: "No skill exists for this operation. Create skill first."
+2. **Do NOT proceed** with direct action or workaround
+3. **Wait** for skill to be created before proceeding
+
+### Skill Unavailable
+
+If a skill fails to load or is broken:
+
+1. **HALT** and report: "Skill <name> is unavailable."
+2. **Do NOT proceed** with workaround or direct action
+3. **Wait** for skill to be fixed
+
 ## Branch Before Edit
 
 **FIRST action before ANY filesystem change:**
