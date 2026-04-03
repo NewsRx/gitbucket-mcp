@@ -23,19 +23,101 @@ Delete merged branches after PR merge, clean stale references, and verify reposi
 - Other merged branches cleaned up
 - Working tree clean
 
+## Chat Output Format (CRITICAL)
+
+**⚠️ CRITICAL: Cleanup reports to CHAT ONLY. Do NOT post to GitHub Issue.**
+
+Cleanup is a local workflow (branch deletion, reference cleanup). It belongs in chat for developer visibility, not in the GitHub Issue permanent record.
+
+### Chat Output Sequence
+
+**Step 1: Start notification**
+```
+Cleanup starting after PR merge confirmation...
+```
+
+**Step 2: Progress updates (chat only)**
+```
+✓ Switched to main
+✓ Deleted local branch: <branch-name>
+✓ Deleted remote branch: <branch-name>
+✓ Pruned stale references
+```
+
+**Step 3: Final completion (chat only)**
+```
+Cleanup complete. Ready for next task.
+
+Issue #<number>: https://github.com/<owner>/<repo>/issues/<number>
+```
+
+### 🚫 FORBIDDEN Chat Outputs
+
+| Forbidden Output | Reason |
+|------------------|--------|
+| "Performing cleanup after PR #X merged" | Too verbose before merge confirmed |
+| Detailed step logs in GitHub Issue | Cleanup is local-only, not issue content |
+| "Ready for next task?" prompts | HALT after completion, no prompting |
+| Asking "Should I close issues?" | Close issues automatically, no asking |
+
+### 🚫 NO GITHUB ISSUE POSTING
+
+**Cleanup does NOT post comments to GitHub Issues except for:**
+- Issue closure via `github_issue_write(method="update", state="closed")`
+- Sub-issue verification (checking if platform auto-closed)
+
+**Why no issue comments:**
+- Cleanup is local git state management
+- Branch deletions don't belong in issue permanent record
+- Developer needs real-time visibility (chat) during cleanup
+- Issues track implementation work, not git cleanup
+
+### Correct Chat Output Sequence
+
+```
+User: "pr merged"
+
+Agent (chat):
+
+Cleanup starting after PR merge confirmation...
+✓ Switched to main
+✓ Deleted local branch: spec/git-workflow-skills
+✓ Remote branch already deleted by GitHub
+✓ Pruned stale references
+
+Cleanup complete. Ready for next task.
+
+Issue #143: https://github.com/NewsRx/gitbucket-mcp/issues/143
+
+[HALT]
+```
+
 ## Procedure
 
-### Step 1: Succinct Confirmation Template (CRITICAL)
+### Step 0: Get PR Context (First)
 
-**The `cleanup` task is THE END of the PR workflow. It MUST produce a one-line succinct confirmation and then HALT.**
+**Before any cleanup steps, get PR and issue context.**
 
-**Succinct Confirmation Template:**
+```python
+# From session context or parameter:
+pr_number = <PR number that was merged>
+branch_name = <branch that was merged>
+
+# Get issue number from PR body or parameter:
+issue_number = <issue being closed>
+```
+
+### Step 1: Report Start (Chat Only)
+
+Report to chat:
 
 ```
-PR #<number> merged. Branch `<branch-name>` deleted. Cleanup complete.
+Cleanup starting after PR merge confirmation...
 ```
 
-**⚠️ CRITICAL: Do NOT re-report PR details or issue lists. The PR was already reported at creation time.**
+**Do NOT post to GitHub Issue.**
+
+### Step 2: Verify PR Merge (CRITICAL - NO EXCEPTIONS)
 
 ### Step 2: Verify PR Merge (CRITICAL - NO EXCEPTIONS)
 
@@ -59,14 +141,20 @@ proceed_to_close_issues()
 
 **Why API verification is mandatory:**
 
-### Step 3: Switch to Main
+### Step 3: Switch to Main and Report (Chat Only)
 
 ```bash
 git checkout main
 git pull origin main
 ```
 
-### Step 4: Delete Current Merged Branch
+Report to chat:
+
+```
+✓ Switched to main
+```
+
+### Step 4: Delete Branch and Report (Chat Only)
 
 ```bash
 # Delete local branch
@@ -79,7 +167,27 @@ git push origin --delete <merged-branch-name> 2>/dev/null || echo "Remote alread
 git fetch --prune
 ```
 
-### Step 5: Clean Other Merged Branches
+Report to chat:
+
+```
+✓ Deleted local branch: <branch-name>
+✓ Deleted remote branch: <branch-name>  # or "Remote already deleted by GitHub"
+✓ Pruned stale references
+```
+
+### Step 5: Final Report (Chat Only)
+
+**After all cleanup steps, report final status to chat:**
+
+```
+Cleanup complete. Ready for next task.
+
+Issue #<number>: https://github.com/<owner>/<repo>/issues/<number>
+```
+
+**Then HALT. No prompts, no questions, no "What's next?".**
+
+### Step 6: Clean Other Merged Branches (Optional)
 
 **Find merged branches:**
 ```bash
@@ -91,7 +199,7 @@ git branch --merged main
 git branch -d <branch>
 ```
 
-### Step 6: Verify Clean State
+### Step 7: Verify Clean State
 
 ```bash
 git status --porcelain  # Must be empty
@@ -384,11 +492,26 @@ NO parent/child structure check
 
 ### Correct Final Output
 
+**Chat output (all cleanup progress reports):**
+
 ```
-PR #81 merged. Branch `spec/github-issue-creation-skill` deleted. Cleanup complete.
+Cleanup starting after PR merge confirmation...
+✓ Switched to main
+✓ Deleted local branch: spec/github-issue-creation-skill
+✓ Remote branch already deleted by GitHub
+✓ Pruned stale references
+
+Cleanup complete. Ready for next task.
+
+Issue #81: https://github.com/NewsRx/gitbucket-mcp/issues/81
 ```
 
-**That's it. ONE LINE. Succinct confirmation. Then stop.**
+**GitHub Issue activity:**
+- Issue closed via `github_issue_write(method="update", state="closed")`
+- NO comments posted for cleanup progress
+- Only closure action
+
+**That's it. Chat has all progress. Issue closed. Then stop.**
 
 ### 🚫 CRITICAL VIOLATIONS After Cleanup
 
