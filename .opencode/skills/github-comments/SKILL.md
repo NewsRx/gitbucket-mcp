@@ -204,6 +204,19 @@ Based on the investigation, the feature is ready for implementation. The API end
 
 ### ✅ REQUIRED Format: Executive Summary
 
+**⚠️ CRITICAL: SUMMARY FIRST, URL LAST (MUST-FIRST REQUIREMENT)**
+
+**The executive summary MUST appear FIRST in the comment, before any URLs or links.**
+
+**Correct order:**
+1. **Summary** — Stakeholder value and impact (FIRST)
+2. **Outcome** — What changed for stakeholders
+3. **URL** — Compare URL or PR link (LAST, if applicable)
+
+**🚫 FORBIDDEN:** Posting URL before the executive summary.
+
+---
+
 **For intermediate task (multi-task spec):**
 ```
 **Summary:**
@@ -230,6 +243,17 @@ All tasks complete from this specification.
 🤖 ✅ Completed by <AgentName> (<ModelID>)
 ```
 
+**For chat output with compare URL:**
+```
+**Summary:**
+
+<1-2 sentences describing the impact and stakeholder value of the change.>
+
+**Outcome:** <What changed for stakeholders / users / system behavior>
+
+Compare URL: https://github.com/owner/repo/compare/main...branch
+```
+
 ### Executive Summary Requirements
 
 The summary MUST answer:
@@ -245,6 +269,38 @@ The summary MUST answer:
 - **"Awaiting authorization"** — Use HALT protocol, not comments
 - **Technical changelog** — Focus on impact, not file-by-file changes
 - **Just "I did X"** — Explain WHY it matters
+- **URL before summary** — CRITICAL VIOLATION: Summary MUST come first
+
+---
+
+### 🚫 CRITICAL VIOLATION: Wrong Chat Output Format
+
+**⚠️ Posting URL before executive summary in chat is a CRITICAL GUIDELINE VIOLATION.**
+
+**🚫 FORBIDDEN:**
+```
+Compare URL: https://github.com/owner/repo/compare/main...branch
+
+**Summary:** Changes to skill files...
+**Outcome:** Added enforcement rules
+```
+
+**✅ REQUIRED:**
+```
+**Summary:**
+
+Updated git-workflow skill to enforce automatic invocation...
+
+**Outcome:** Developers will now see compare URL after every implementation.
+
+Compare URL: https://github.com/owner/repo/compare/main...branch
+```
+
+**Why This Matters:**
+- Developer needs context BEFORE clicking URL
+- Executive summary explains business impact
+- Outcome states what changed for stakeholders
+- URL appears LAST as actionable link
 
 ### Why Executive Summaries?
 
@@ -262,6 +318,22 @@ The summary MUST answer:
 
 **🚫 WRONG:** Complete task → Move to next → Comment later
 **✅ RIGHT:** Complete task → Comment → Then move to next
+
+---
+
+### Enforcement Checklist
+
+**Before posting any progress comment or chat output, verify:**
+
+- [ ] **Summary FIRST** — Executive summary appears before any URLs
+- [ ] **URL LAST** — Compare URL or PR link appears at the end (if applicable)
+- [ ] **No file lists** — Removed redundant file change lists
+- [ ] **No "Next" field** — Removed dialog prompts
+- [ ] **Stakeholder focus** — Summary explains impact, not technical details
+- [ ] **Outcome stated** — Clear what changed for users/system
+- [ ] **Plain text emoji** — Emoji NOT inside italic/bold formatting
+
+**🚫 CRITICAL CHECK:** If URL appears before summary → STOP and reorder.
 
 ---
 
