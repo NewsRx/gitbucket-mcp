@@ -9,6 +9,22 @@ compatibility: opencode
 
 ## Overview
 
+**⚠️ EXECUTION REQUIRED: This skill is an EXECUTABLE WORKFLOW, not reference documentation.**
+
+When this skill is invoked with `/skill git-workflow` or `/skill git-workflow --task <task-name>`, the agent MUST EXECUTE the procedural steps defined in this skill, NOT just read the content and HALT.
+
+**Correct behavior:**
+```
+Invoke skill → Load content → EXECUTE all procedural steps → Report results → HALT
+```
+
+**Wrong behavior (CRITICAL VIOLATION):**
+```
+Invoke skill → Load content → HALT without executing steps
+```
+
+---
+
 Git Workflow Enforcer ensuring all git operations follow the repository's strict branch-first, stash-first workflow. Squashing happens ONLY at PR creation time, not during implementation. Invoked automatically before implementation begins and when PR creation is requested.
 
 ## Persona
@@ -456,7 +472,17 @@ HALT
 - Did not follow procedural steps
 - Skill is executable workflow, not just reference material
 
-**Fix:** Agent must EXECUTE the loaded skill, not just read it.
+**What Happened (2026-04-03):**
+1. User said "pr" (shorthand for PR creation)
+2. Agent loaded git-workflow --task pr-creation skill content
+3. Agent stopped after loading - DID NOT execute Steps 1-7
+4. Developer had to report the defect
+
+**Same Root Cause:**
+- Skill invoked but not executed
+- Agent treated skill as documentation, not workflow
+
+**Fix:** Added execution enforcement directive to SKILL.md Overview and pr-creation.md Step 1. Agent must EXECUTE the loaded skill, not just read it.
 
 ## Critical Rules
 

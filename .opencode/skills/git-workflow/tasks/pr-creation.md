@@ -1,5 +1,21 @@
 # Task: pr-creation
 
+## ⚠️ EXECUTION REQUIRED
+
+**This task is an EXECUTABLE WORKFLOW. When invoked, you MUST EXECUTE all steps, not just read and HALT.**
+
+**Correct behavior:**
+```
+Invoke task → Load content → EXECUTE Step 1 → EXECUTE Step 1.5 → ... → Report results → HALT
+```
+
+**Wrong behavior (CRITICAL VIOLATION):**
+```
+Invoke task → Load content → HALT without executing
+```
+
+---
+
 ## Purpose
 
 Create pull request after explicit user instruction. Squash commits to single commit, push branch, create PR via GitHub MCP.
