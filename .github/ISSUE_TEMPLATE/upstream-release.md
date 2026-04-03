@@ -92,6 +92,11 @@ The remote development team may reorganize the codebase, change directory struct
    - Dependency changes in build files
    - Authentication/authorization changes
 
+7. **Search for code comment gotchas:**
+   - Search for `TODO`, `FIXME`, `WARNING`, `NOTE` markers in API-related files
+   - Search for `@deprecated`, `@note` annotations
+   - Document any limitations, known issues, or caveats found in comments
+
 ### What to Look For
 
 | Category | Search Approach |
@@ -102,6 +107,7 @@ The remote development team may reorganize the codebase, change directory struct
 | **Model changes** | Data structure changes affecting request/response schemas |
 | **Service changes** | Methods called by API controllers |
 | **Dependency changes** | Library upgrades affecting API behavior |
+| **Code comment gotchas** | TODO, FIXME, WARNING, NOTE, @deprecated markers |
 
 ### Discovery Process
 
@@ -132,6 +138,7 @@ Before analyzing API changes, discover the project's actual structure, language,
 | `openapi-specs/v{VERSION}/openapi.json` | OpenAPI specification for this version |
 | `openapi-specs/v{VERSION}/release-notes.md` | Relevant notes from release (if any) |
 | `openapi-specs/v{VERSION}/api-diff.md` | API differences from prior version |
+| `openapi-specs/v{VERSION}/AGENTS.md` | AI agent quick reference |
 
 ---
 
@@ -182,8 +189,9 @@ Create `openapi-specs/v{VERSION}/api-diff.md` documenting:
 5. ☐ Compare source code directly between versions (ONLY source code is authoritative)
 6. ☐ Document API changes from direct source comparison
 7. ☐ Note any BREAKING CHANGES or deprecated endpoints
-8. ☐ Create `openapi-specs/v{VERSION}/api-diff.md` documenting differences
-9. ☐ If release notes mention API changes, verify each claim against source code
+8. ☐ Search for code comment gotchas (TODO, FIXME, WARNING, NOTE, @deprecated)
+9. ☐ Create `openapi-specs/v{VERSION}/api-diff.md` documenting differences
+10. ☐ If release notes mention API changes, verify each claim against source code
 
 ---
 
@@ -199,7 +207,24 @@ Create `openapi-specs/v{VERSION}/api-diff.md` documenting:
 
 ---
 
-## Phase 3: Verification (Auto-progress)
+## Phase 3: AGENTS.md Creation (Gated)
+
+### Steps
+
+1. ☐ Create `openapi-specs/v{VERSION}/AGENTS.md` using template from `openapi-specs/v4.44.0/AGENTS.md`
+2. ☐ Include Endpoint Categories table
+3. ☐ Include Known Gotchas section with:
+   - Breaking changes from api-diff.md
+   - Code comment gotchas found in Phase 1
+   - Version-specific migration notes
+4. ☐ Include Required Parameters Checklist
+5. ☐ Include Common Usage Patterns (Python stdlib examples: urllib.request)
+6. ☐ Include Version-Specific Notes section
+7. ☐ Include Source Code Gotchas section (TODO/FIXME/WARNING/NOTE markers)
+
+---
+
+## Phase 4: Verification (Auto-progress)
 
 ### Steps
 
@@ -207,20 +232,22 @@ Create `openapi-specs/v{VERSION}/api-diff.md` documenting:
 2. ☐ Verify all endpoints documented
 3. ☐ Check for breaking changes vs previous version
 4. ☐ Verify api-diff.md accurately reflects changes
+5. ☐ Verify AGENTS.md documents all gotchas and migration notes
 
 ---
 
-## Phase 4: Human Approval (Gated)
+## Phase 5: Human Approval (Gated)
 
 ### Steps
 
 1. ☐ Human review of OpenAPI specification
 2. ☐ Human review of API differences document
-3. ☐ Approve or request revisions
+3. ☐ Human review of AGENTS.md quick reference
+4. ☐ Approve or request revisions
 
 ---
 
-## Phase 5: State Update (Gated)
+## Phase 6: State Update (Gated)
 
 ### AI Agent Responsibility
 
@@ -228,29 +255,39 @@ After OpenAPI spec PR merge confirms successful implementation:
 
 1. ☐ Wait for PR merge confirmation (see `124-github-archive-workflow.md` for closure workflow)
 2. ☐ **Create feature branch FIRST** (see `110-git-branch-first.md`):
-   ```bash
-   git checkout main && git pull origin main
-   git checkout -b chore/update-state-to-{VERSION}
+   ```python
+   import subprocess
+   subprocess.run(["git", "checkout", "main"], check=True)
+   subprocess.run(["git", "pull", "origin", "main"], check=True)
+   subprocess.run(["git", "checkout", "-b", f"chore/update-state-to-{VERSION}"], check=True)
    ```
 3. ☐ Update state file:
-   ```bash
-   echo "{VERSION}" > workflow-state/last_release.txt
+   ```python
+   from pathlib import Path
+   Path("workflow-state/last_release.txt").write_text("{VERSION}")
    ```
 4. ☐ Commit with co-author trailers:
-   ```bash
-   git add workflow-state/last_release.txt
-   git commit -m "chore: update state to {VERSION} after release processing" \
-       --trailer "Co-authored-by: <AI-Name> (<model-id>) <noreply@ai-service>" \
-       --trailer "Co-authored-by: <Human-Name> <human-email>"
+   ```python
+   import subprocess
+   subprocess.run(["git", "add", "workflow-state/last_release.txt"], check=True)
+   subprocess.run([
+       "git", "commit", "-m", f"chore: update state to {VERSION} after release processing",
+       "--trailer", f"Co-authored-by: <AI-Name> (<model-id>) <noreply@ai-service>",
+       "--trailer", f"Co-authored-by: <Human-Name> <human-email>"
+   ], check=True)
    ```
 5. ☐ Push and create PR:
-   ```bash
-   git push origin chore/update-state-to-{VERSION}
-   gh pr create --title "chore: update state to {VERSION}" \
-       --body "Updates last_release.txt after successful OpenAPI spec processing for {VERSION}"
+   ```python
+   import subprocess
+   subprocess.run(["git", "push", "origin", f"chore/update-state-to-{VERSION}"], check=True)
+   subprocess.run([
+       "gh", "pr", "create",
+       "--title", f"chore: update state to {VERSION}",
+       "--body", f"Updates last_release.txt after successful OpenAPI spec processing for {VERSION}"
+   ], check=True)
    ```
 6. ☐ Wait for human to merge PR
-7. ☐ Verify state file after merge: `cat workflow-state/last_release.txt`
+7. ☐ Verify state file after merge: `Path("workflow-state/last_release.txt").read_text()`
 
 **CRITICAL:**
 - State file updates require PR workflow (see `113-git-pr-workflow.md`)
