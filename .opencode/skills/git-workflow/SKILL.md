@@ -188,6 +188,12 @@ pr-creation: Squash → Create PR → HALT
    - Phase 4: PR Creation (user-initiated) → `pr-creation` task
    - Phase 5: Branch Cleanup (after merge) → `cleanup` task
 
+3. **Critical workflow continuity (NO HALT between phases):**
+   - **pre-work → implementation is CONTINUOUS** - Agent MUST proceed directly from pre-work to implementation with NO HALT between them
+   - The report from pre-work ("Ready for implementation on branch: X") is informational only, NOT a stopping point
+   - HALT occurs ONLY after review-prep (when implementation is complete)
+   - DO NOT stop after pre-work to wait for user input
+
 ## Chat Output Format (CRITICAL)
 
 **⚠️ CRITICAL: Chat output MUST have executive summary BEFORE the URL.**

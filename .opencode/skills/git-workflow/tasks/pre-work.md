@@ -159,9 +159,25 @@ git checkout main && git pull origin main
 git checkout -b spec/<short-name>  # or feature/<description>
 ```
 
-### Step 6: Report Ready
+### Step 6: Report Ready and Continue
 
 Report: "Ready for implementation on branch: <branch-name>"
+
+**⚠️ CRITICAL: This is NOT a halt point.**
+
+After reporting ready, the agent MUST continue directly to implementation. The "Ready for implementation" message is informational only — it does NOT mean "wait for user input."
+
+**Correct workflow:**
+```
+pre-work → Report ready → IMMEDIATELY continue to implementation
+```
+
+**Wrong workflow (CRITICAL VIOLATION):**
+```
+pre-work → Report ready → HALT → Wait for user
+```
+
+The HALT point occurs ONLY after review-prep (implementation complete).
 
 ## ⚠️ Edge Case: Already Implemented (No Changes Needed)
 
