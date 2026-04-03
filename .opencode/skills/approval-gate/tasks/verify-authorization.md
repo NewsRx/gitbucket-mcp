@@ -18,7 +18,7 @@ Check for explicit authorization and needs-approval label status before implemen
 
 ## Procedure
 
-### Step 0: Verify Git State (MANDATORY FIRST)
+### Step 1: Verify Git State (MANDATORY FIRST)
 
 **🚫 CRITICAL: This check MUST happen BEFORE any other work.**
 
@@ -51,14 +51,14 @@ git checkout main && git pull origin main
 git checkout -b spec/<short-name>
 ```
 
-### Step 1: Verify Authorization Is Explicit
+### Step 2: Verify Authorization Is Explicit
 
 Check that authorization is:
 - From user (not agent)
 - Explicit ("approved", "go", "approved: N.M")
 - For the CURRENT issue (not old session)
 
-### Step 2: Check needs-approval Label
+### Step 3: Check needs-approval Label
 
 ```python
 # Get issue labels
@@ -71,7 +71,7 @@ if has_label and explicit_authorization:
     # Optionally note: "needs-approval label can be removed"
 ```
 
-### Step 3: Record Authorization Scope
+### Step 4: Record Authorization Scope
 
 Authorization applies to:
 - Specific issue only

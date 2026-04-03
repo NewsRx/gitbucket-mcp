@@ -18,7 +18,7 @@ Create pull request after explicit user instruction. Squash commits to single co
 
 ## Procedure
 
-### Step 0: Verify PR Instruction (MANDATORY FIRST)
+### Step 1: Verify PR Instruction (MANDATORY FIRST)
 
 **🚫 CRITICAL: This is an ENFORCEMENT GATE, not just documentation.**
 
@@ -97,6 +97,7 @@ If ANY condition NOT satisfied → STOP and report.
 ✅ review-prep completed (compare URL reported)
 ✅ Developer had chance to review
 ✅ Branch pushed to remote
+✅ Changelog generated OR [skip changelog] directive present
 ✅ Ready to squash and create PR
 ```
 
@@ -150,21 +151,45 @@ Correct next step:
 To create PR: Say 'create a PR' explicitly, not as a question.
 ```
 
-### Step 1: Changelog Generation (MANDATORY SUB-TASK)
+**Changelog missing or not staged:**
+```
+⛔ HALT: Changelog verification failed.
+
+Expected: CHANGELOG.md staged for commit (M CHANGELOG.md in git status)
+Found: No changelog changes detected
+
+This occurs when:
+1. Changelog generation was skipped (Step 2.2 not executed)
+2. Changelog was generated but not staged (Step 2.3 skipped)
+3. [skip changelog] directive not present
+
+Previous PRs (#109, #114, #118, #119, #120) merged without changelog updates
+due to missing this verification checkpoint.
+
+Correct sequence:
+1. Step 2.2: Run /skill changelog-generator --since-last-release
+2. Step 2.3: Run git add CHANGELOG.md
+3. Step 2.4: Verify git status shows "M CHANGELOG.md"
+4. Continue to Step 3 (squash)
+
+To skip changelog: Add [skip changelog] to commit message or PR title.
+```
+
+### Step 2: Changelog Generation (MANDATORY SUB-TASK)
 
 **⚠️ CRITICAL: This step EXECUTES the changelog-generator skill as a sub-task.**
 
 The skill MUST run as a sub-task to ensure context isolation - the main session will only see the final result, not the intermediate analysis.
 
-#### Step 1.1: Check Skip Directive
+#### Step 2.1: Check Skip Directive
 
 Before invoking the skill, check for `[skip changelog]` in:
 - Last commit message (if squashing multiple commits)
 - PR title
 
-If `[skip changelog]` is present, proceed directly to Step 2 (skip changelog generation).
+If `[skip changelog]` is present, proceed directly to Step 3 (skip changelog generation).
 
-#### Step 1.2: Execute Changelog Sub-Task (MANDATORY EXECUTION)
+#### Step 2.2: Execute Changelog Sub-Task (MANDATORY EXECUTION)
 
 **EXECUTE THIS COMMAND AS A SUB-TASK:**
 
@@ -185,7 +210,7 @@ If `[skip changelog]` is present, proceed directly to Step 2 (skip changelog gen
 - Skill writes CHANGELOG.md to filesystem
 - Main context sees: "Changelog generated successfully" or similar confirmation
 
-#### Step 1.3: Stage Changelog Changes (MANDATORY)
+#### Step 2.3: Stage Changelog Changes (MANDATORY)
 
 After the sub-task completes, stage the changelog:
 
@@ -193,7 +218,51 @@ After the sub-task completes, stage the changelog:
 git add CHANGELOG.md
 ```
 
-**CRITICAL:** This happens BEFORE the squash in Step 2, ensuring changelog changes are included in the single commit.
+**CRITICAL:** This happens BEFORE the squash in Step 3, ensuring changelog changes are included in the single commit.
+
+#### Step 2.4: Verify Changelog Staged (ENFORCEMENT GATE)
+
+**BEFORE proceeding to Step 3, verify changelog was actually staged:**
+
+```bash
+# Check if CHANGELOG.md is staged (M = modified in index)
+git status --porcelain CHANGELOG.md
+```
+
+**Expected Result:**
+- `M CHANGELOG.md` OR `A CHANGELOG.md` (staged for commit)
+- OR `[skip changelog]` directive was present (proceed to Step 3)
+
+**If changelog NOT staged and NO skip directive:**
+
+```
+⛔ ENFORCEMENT GATE FAILED: Changelog not staged
+
+The changelog-generator skill was invoked but CHANGELOG.md is not staged.
+
+Diagnostic checklist:
+□ Did Step 2.2 execute the skill?
+□ Did Step 2.3 stage the result?
+□ Is [skip changelog] directive present?
+
+Resolution:
+1. Run: /skill changelog-generator --since-last-release
+2. Run: git add CHANGELOG.md
+3. Verify: git status --porcelain CHANGELOG.md
+4. Expected: "M CHANGELOG.md" appears
+5. Continue to Step 3
+
+If skipping changelog, ensure [skip changelog] is in commit message or PR title.
+```
+
+**Why This Check Exists:**
+
+PRs #109, #114, #118, #119, #120 merged without changelog updates because Step 1 Enforcement Gate passed, Step 2 documented the changelog generation, but nothing verified the changelog was actually staged before squash.
+
+This checkpoint ensures:
+1. Skill invocation (Step 2.2) actually happened
+2. Staging (Step 2.3) actually happened
+3. Changelog changes ARE in the squash commit
 
 #### Context Isolation Benefits
 
@@ -205,9 +274,9 @@ git add CHANGELOG.md
 | Noise filtering | NOT: generated text |
 | Thinking tokens consumed | Minimal result token only |
 
-Then continue to Step 2 (squash).
+Then continue to Step 3 (squash).
 
-### Step 2: Squash to Single Commit
+### Step 3: Squash to Single Commit
 
 **MANDATORY:** All PRs must have exactly ONE commit.
 
@@ -218,13 +287,13 @@ git commit -m "<descriptive message>" \
     --trailer "Co-authored-by: <Human-Name> <human-email>"
 ```
 
-### Step 3: Push to Remote
+### Step 4: Push to Remote
 
 ```bash
 git push --force-with-lease origin <branch>
 ```
 
-### Step 4: Collect Sub-Issues (Multi-Task Specs)
+### Step 5: Collect Sub-Issues (Multi-Task Specs)
 
 **For specs with sub-issues:**
 
@@ -248,7 +317,7 @@ No sub-issues needed. Include only parent issue.
 - Agent verifies closure AFTER PR merge via GitHub API
 - Only in edge case (platform fails) does agent manually close
 
-### Step 5: Create PR via GitHub MCP
+### Step 6: Create PR via GitHub MCP
 
 ```python
 github_create_pull_request(
@@ -272,7 +341,7 @@ Fixes #<child2>
 - Include ALL sub-issues for multi-task specs
 - Brief description of changes
 
-### Step 6: Report PR URL and HALT
+### Step 7: Report PR URL and HALT
 
 ### ⚠️ CRITICAL: PR URL Reporting is MANDATORY
 

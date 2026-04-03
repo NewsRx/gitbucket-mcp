@@ -1,9 +1,11 @@
 ---
 name: changelog-generator
 description: Automatically creates user-facing changelogs from git commits by analyzing commit history, categorizing changes, and transforming technical commits into clear, customer-friendly release notes. Turns hours of manual changelog writing into minutes of automated generation.
+license: MIT
+compatibility: opencode
 ---
 
-# Changelog Generator
+# Skill: changelog-generator
 
 This skill transforms technical git commits into polished, user-friendly changelogs that your customers and users will actually understand and appreciate.
 
@@ -12,6 +14,21 @@ This skill transforms technical git commits into polished, user-friendly changel
 - **Git**: Required for reading commit history
 - **Repository access**: Must be run from a git repository root
 - **Optional**: Custom changelog style guide (CHANGELOG_STYLE.md)
+
+## Tasks
+
+| Task | Purpose | Words |
+|------|---------|-------|
+| `since-last-release` | Generate changelog for commits since last CHANGELOG.md update | ~170 |
+| `date-range` | Generate changelog for commits within specific date range | ~90 |
+| `backfill` | One-time historical backfill of missing changelog entries | ~120 |
+
+## Invocation
+
+- `/skill changelog-generator --task since-last-release` - Normal PR workflow (after PR creation)
+- `/skill changelog-generator --task date-range --from DATE --to DATE` - Weekly/monthly updates
+- `/skill changelog-generator --task backfill` - One-time historical catchup
+- `/skill changelog-generator` - Overview only
 
 ## When to Use This Skill
 
