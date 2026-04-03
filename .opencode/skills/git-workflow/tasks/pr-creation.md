@@ -103,77 +103,267 @@ If ANY condition NOT satisfied → STOP and report.
 
 **If ANY checkbox unchecked → STOP and report what's missing.**
 
-#### HALT Messages
+### Step 1.5: Check Existing PR State (MERGED PR HANDLING)
 
-**Implementation authorization is NOT PR authorization:**
+**🚫 CRITICAL: This check MUST happen BEFORE squashing or creating PR.**
+
+This step handles the edge case where a PR already exists for the branch.
+
+#### Step 1.5a: Check for Existing PR
+
+Query GitHub API to check if a PR already exists for this branch:
+
+```python
+# Get current branch name
+branch_name = subprocess.check_output(['git', 'branch', '--show-current'], text=True).strip()
+
+# List PRs for this branch
+prs = github_list_pull_requests(
+    owner=GIT_OWNER,
+    repo=GIT_REPO,
+    state="all",  # Include open, closed, merged
+    head=f"{GIT_OWNER}:{branch_name}"
+)
 ```
-PR creation requires explicit instruction.
 
-User said 'approved' which authorizes implementation ONLY, not PR creation.
+**If NO existing PR found:**
+- Proceed to Step 2 (Changelog Generation)
+- This is a new PR
 
-After implementation completes:
-1. Report completion (exec summary + compare URL)
-2. HALT and wait for developer review
-3. Wait for explicit 'create a PR' instruction
+**If PR EXISTS:**
+- Continue to Step 1.5b to check PR state
 
-To create PR: Say 'create a PR' or 'make a PR' explicitly.
+#### Step 1.5b: Check PR State (open/merged/closed)
+
+```python
+pr = prs[0]  # Take first (most recent) PR
+pr_state = pr.get("state")  # "open", "closed"
+merged_at = pr.get("merged_at")  # Timestamp if merged, None otherwise
 ```
 
-**No PR instruction after implementation:**
+**PR State Decision Matrix:**
+
+| State | merged_at | Action |
+|-------|-----------|--------|
+| open | None | ✅ **UPDATE EXISTING PR** - Push new commits, existing PR updates automatically |
+| closed | None | ⚠️ **Check close reason** - May be draft closed, proceed with caution |
+| closed | timestamp | 🔄 **MERGED PR DETECTED** - Go to Step 1.5c |
+| open | timestamp | ❌ **INVALID STATE** - Report error, HALT |
+
+#### Step 1.5c: Handle Merged PR (MANDATORY HALT POINT)
+
+**If PR is already merged:**
+
+1. **Rebase branch on main:**
+   ```bash
+   git fetch origin
+   git rebase origin/main
+   ```
+
+2. **Check for remaining changes:**
+   ```bash
+   git diff origin/main
+   ```
+
+3. **Decision:**
+   
+   | Remaining Changes | Action |
+   |-------------------|--------|
+   | Has differences | Create NEW PR for additional work |
+   | No differences | HALT - branch already merged, no new PR needed |
+
+4. **HALT with appropriate message:**
+
+**If branch has remaining changes:**
 ```
-Implementation complete. Awaiting PR instruction.
+🔄 MERGED PR DETECTED - Creating New PR
+
+The existing PR #{pr_number} was merged to main.
+
+Branch has been rebased on main and contains new changes:
+- Rebased commits: {commit_count}
+- New PR will be created for additional work
+
+Proceeding with new PR creation...
+```
+
+**If branch is already merged (no remaining changes):**
+```
+✅ BRANCH ALREADY MERGED
+
+The branch '{branch_name}' has already been merged via PR #{pr_number}.
 
 Current state:
-- Implementation done
-- Branch pushed
-- Compare URL generated
+- Branch is up-to-date with origin/main
+- No additional changes to merge
 
-Before creating PR:
-1. Developer reviews changes via compare URL
-2. Developer says 'create a PR' explicitly
+No new PR needed. The work from this branch was already incorporated.
 
-To create PR: Say 'create a PR' when ready.
+**Action:** Consider deleting the local branch if no further work is needed.
+  git checkout main
+  git branch -d {branch_name}
 ```
 
-**Question detected (not instruction):**
+#### ⚠️ Edge Cases
+
+**Branch ahead of main after merge:**
+- Developer added commits after PR merged
+- Create new PR for continuation work
+- New PR title should reflect continuation
+
+**Branch behind main after merge:**
+- Rebase will fast-forward
+- Check for remaining changes after rebase
+
+**Conflicts during rebase:**
+- HALT and report conflicts
+- Provide guidance on resolution
+- Suggest manual intervention
+
+### Step 1.5d: Check for Merge Conflicts (CONFLICT DETECTION)
+
+**🚫 CRITICAL: This check MUST happen BEFORE squashing or creating PR.**
+
+This step detects merge conflicts in the PR and handles them appropriately.
+
+#### Step 1.5d.1: Check GitHub PR Mergeable State
+
+For OPEN PRs, check the `mergeable` attribute from GitHub API:
+
+```python
+# For existing open PRs
+if pr_state == "open":
+    pr_details = github_pull_request_read(method="get", owner=GIT_OWNER, repo=GIT_REPO, pullNumber=pr_number)
+    mergeable = pr_details.get("mergeable")  # True, False, or None
+    mergeable_state = pr_details.get("mergeable_state")  # "clean", "dirty", "unknown", etc.
 ```
-Question detected - not PR instruction.
 
-User asked: "Ready for PR?"
+**Mergeable State Matrix:**
 
-This is a question, not an instruction to create PR.
+| mergeable | mergeable_state | Meaning | Action |
+|-----------|-----------------|---------|--------|
+| True | "clean" | No conflicts | ✅ Proceed with PR creation |
+| True | "has_hooks" | No conflicts + hooks | ✅ Proceed (hooks run on merge) |
+| False | "dirty" | Merge conflicts | 🔄 **CONFLICTS DETECTED** - Go to Step 1.5d.2 |
+| None | "unknown" | GitHub checking | ⏳ Wait and retry, or check locally |
+| False | "blocked" | Blocked by branch protection | ⚠️ Report blocker, HALT |
 
-Correct next step:
-1. Report completion (if not already done)
-2. Present compare URL (if not already done)
-3. HALT and wait for explicit 'create a PR'
+#### Step 1.5d.2: Handle Merge Conflicts (MERGED PR HANDLING)
 
-To create PR: Say 'create a PR' explicitly, not as a question.
+**If PR has merge conflicts (mergeable=False, mergeable_state="dirty"):**
+
+1. **Fetch conflict files:**
+   ```bash
+   git fetch origin
+   git log --oneline origin/main..HEAD  # See commits to be merged
+   ```
+
+2. **Get conflict files from GitHub API:**
+   ```python
+   # GitHub doesn't provide conflict files directly via API
+   # Local check required:
+   result = subprocess.run(['git', 'merge', '--no-commit', '--no-ff', 'origin/main'], capture_output=True)
+   if result.returncode != 0 and "CONFLICT" in result.stderr:
+       # Conflicts detected
+       conflict_files = subprocess.check_output(
+           ['git', 'diff', '--name-only', '--diff-filter=U'],
+           text=True
+       ).strip().split('\n')
+   ```
+
+3. **Classify conflicts (AI-objective vs AI-subjective):**
+
+**AI-Objective Conflicts (Auto-Resolve):**
+| Conflict Type | Auto-Resolution Strategy |
+|----------------|--------------------------|
+| Import statement changes | Take both import sets |
+| Whitespace/formatting | Apply consistent formatting |
+| Same function moved to different location | Use new location |
+| Additive changes (both sides add, no overlap) | Take both additions |
+| Configuration file additions | Merge sections |
+
+**AI-Subjective Conflicts (Request User Input):**
+| Conflict Type | Why Subjective | HALT Action |
+|----------------|----------------|-------------|
+| Logical/behavioral conflicts | Different implementations | Request clarification |
+| Deleted file vs modified file | Need design decision | Request decision |
+| Architectural changes | Multiple valid approaches | Request approach choice |
+| Unclear intent | Both sides modify same logic | Request which version |
+
+4. **Resolution Flow:**
+
+**For AI-objective conflicts:**
+```bash
+# Auto-resolve
+git checkout --ours <file>   # or --theirs, or merge manually
+git add <resolved_files>
 ```
 
-**Changelog missing or not staged:**
+**For AI-subjective conflicts:**
 ```
-⛔ HALT: Changelog verification failed.
+🚫 MERGE CONFLICTS DETECTED - User Input Required
 
-Expected: CHANGELOG.md staged for commit (M CHANGELOG.md in git status)
-Found: No changelog changes detected
+The following conflicts need your decision:
 
-This occurs when:
-1. Changelog generation was skipped (Step 2.2 not executed)
-2. Changelog was generated but not staged (Step 2.3 skipped)
-3. [skip changelog] directive not present
+**File:** src/file.py
+**Conflict:** Lines 42-50
+**Type:** AI-subjective (behavioral conflict)
+**Description:** Both branches modified the authentication logic differently
 
-Previous PRs (#109, #114, #118, #119, #120) merged without changelog updates
-due to missing this verification checkpoint.
-
-Correct sequence:
-1. Step 2.2: Run /skill changelog-generator --since-last-release
-2. Step 2.3: Run git add CHANGELOG.md
-3. Step 2.4: Verify git status shows "M CHANGELOG.md"
-4. Continue to Step 3 (squash)
-
-To skip changelog: Add [skip changelog] to commit message or PR title.
+**Your branch:**
+```python
+def authenticate(user):
+    return validate_token(user.token)
 ```
+
+**Main branch:**
+```python
+def authenticate(user):
+    return check_session(user.session_id)
+```
+
+**Please specify which approach to use:**
+1. Keep your branch's version: `git checkout --ours src/file.py`
+2. Use main's version: `git checkout --theirs src/file.py`
+3. Provide custom resolution
+
+**Files with conflicts:**
+- src/file.py (AI-subjective)
+- src/other.py (AI-objective - auto-resolved)
+
+Resolution command: `git checkout --{ours|theirs} src/file.py`
+Then: `git add src/file.py src/other.py`
+```
+
+5. **After resolution:**
+```bash
+# Continue with rebase
+git rebase --continue
+# Or abort if unrecoverable
+git rebase --abort
+```
+
+#### ⚠️ Edge Cases
+
+**All conflicts AI-objective:**
+- Auto-resolve all
+- Continue with PR creation
+- Post comment noting resolution
+
+**All conflicts AI-subjective:**
+- HALT with full conflict list
+- Request user decision for each
+- Do NOT proceed without resolution
+
+**Mixed objective/subjective:**
+- Auto-resolve objective conflicts
+- List subjective conflicts
+- HALT for subjective decisions
+
+**Unable to classify:**
+- HALT with conflict details
+- Request user inspection
+- Do NOT assume subjective/objective
 
 ### Step 2: Changelog Generation (MANDATORY SUB-TASK)
 
