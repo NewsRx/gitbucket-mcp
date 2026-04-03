@@ -113,7 +113,7 @@ When implementation determines "no file changes needed":
 - All implementation work complete AND pushed to remote
 - Feature branch pushed (done by implementation task)
 - No explicit "create a PR" instruction yet
-- Temp files cleaned up (see Step 0)
+- Temp files cleaned up (see Step 1)
 
 ## Exit Criteria
 
@@ -122,7 +122,7 @@ When implementation determines "no file changes needed":
 
 ## Procedure
 
-### Step 0: Temp File Cleanup (MANDATORY)
+### Step 1: Temp File Cleanup (MANDATORY)
 
 **Before pushing, clean up temporary files.**
 
@@ -142,7 +142,7 @@ ls ./tmp/
 - `./tmp/*.log` (log files)
 - `./tmp/.*` (hidden files like `.output.txt`)
 
-### Step 1: Verify Branch Is Pushed
+### Step 2: Verify Branch Is Pushed
 
 **Before generating compare URL, verify branch is on remote.**
 
@@ -159,7 +159,7 @@ git push -u origin <branch-name>
 
 **This ensures compare URL will work correctly.**
 
-### Step 2: Generate Compare URL
+### Step 3: Generate Compare URL
 
 Using session values (GIT_OWNER, GIT_REPO):
 
@@ -167,7 +167,7 @@ Using session values (GIT_OWNER, GIT_REPO):
 https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-name>
 ```
 
-### Step 2: Report Completion (BOTH Issue AND Chat)
+### Step 4: Report Completion (BOTH Issue AND Chat)
 
 **⚠️ CRITICAL: URLs go in CHAT ONLY - NEVER to GitHub Issues.**
 
@@ -202,7 +202,7 @@ Compare URL: https://github.com/${GIT_OWNER}/${GIT_REPO}/compare/main...<branch-
 - Developer can click URL from chat to review changes
 - BOTH locations have matching summaries for context
 
-### Step 3: HALT (MANDATORY - NO EXCEPTIONS)
+### Step 5: HALT (MANDATORY - NO EXCEPTIONS)
 
 **🚫 CRITICAL VIOLATION: Proceeding past this point without explicit "create a PR" is a CRITICAL GUIDELINE VIOLATION.**
 
